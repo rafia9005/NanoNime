@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nanonime/screen/splash.dart';
 import 'package:nanonime/styles/colors.dart';
-
 // endpoint
 import 'package:nanonime/screen/main.dart';
+import 'package:nanonime/screen/auth/login.dart';
+import 'package:nanonime/screen/auth/register.dart';
 
 void main() {
   runApp(const Runner());
@@ -30,15 +32,20 @@ class Runner extends StatelessWidget {
           secondary: AppColors.secondary,
         ),
 
-        textTheme: GoogleFonts.pixelifySansTextTheme(
+        textTheme: GoogleFonts.interTextTheme(
           ThemeData.dark().textTheme.apply(
             bodyColor: AppColors.foreground,
             displayColor: AppColors.foreground,
           ),
         ),
       ),
-      initialRoute: "/",
-      routes: {"/": (context) => const MainScreen()},
+      initialRoute: "/splash",
+      routes: {
+        "/splash": (context) => const SplashScreen(),
+        "/": (context) => const MainScreen(),
+        "/login": (context) => const AuthLoginScreen(),
+        "/register": (context) => const AuthRegisterScreen(),
+      },
     );
   }
 }
