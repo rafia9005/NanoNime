@@ -57,7 +57,7 @@ class _SplashScreenState extends State<SplashScreen>
     _fadeOutController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
         if (mounted) {
-          Navigator.pushReplacementNamed(context, '/login');
+          Navigator.pushReplacementNamed(context, '/');
         }
       }
     });
