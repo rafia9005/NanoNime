@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/gestures.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:nanonime/styles/colors.dart';
+import 'package:nanonime/core/theme/colors.dart';
+import 'package:nanonime/core/router/app_router.dart';
 
 class AuthRegisterScreen extends StatelessWidget {
   const AuthRegisterScreen({super.key});
@@ -14,25 +15,25 @@ class AuthRegisterScreen extends StatelessWidget {
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(24.0),
           child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              "Nanonime",
-              textAlign: TextAlign.center,
-              style: GoogleFonts.pixelifySans(
-                fontSize: 48,
-                fontWeight: FontWeight.bold,
-                color: AppColors.primary,
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                "Nanonime",
+                textAlign: TextAlign.center,
+                style: GoogleFonts.pixelifySans(
+                  fontSize: 48,
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primary,
+                ),
               ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              "Silakan login untuk melanjutkan",
-              textAlign: TextAlign.center,
-              style: TextStyle(color: AppColors.foreground, fontSize: 14),
-            ),
-            const SizedBox(height: 40),
+              const SizedBox(height: 8),
+              Text(
+                "Silakan login untuk melanjutkan",
+                textAlign: TextAlign.center,
+                style: TextStyle(color: AppColors.foreground, fontSize: 14),
+              ),
+              const SizedBox(height: 40),
 
               _buildField("Email", Icons.email_outlined),
               const SizedBox(height: 16),
@@ -75,7 +76,7 @@ class AuthRegisterScreen extends StatelessWidget {
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                          Navigator.pushNamed(context, '/login');
+                            AppRouter.toLogin(context);
                           },
                       ),
                     ],

@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../models/anime.dart';
-import '../styles/colors.dart';
+import '../../data/models/anime.dart';
+import '../../core/theme/colors.dart';
 
 /// Reusable Anime card used in grid/list views.
 ///

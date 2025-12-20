@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
-import 'package:nanonime/styles/colors.dart';
+import 'package:nanonime/core/theme/colors.dart';
+import 'package:nanonime/core/router/app_router.dart';
 
 class AuthLoginScreen extends StatelessWidget {
   const AuthLoginScreen({super.key});
@@ -38,12 +39,15 @@ class AuthLoginScreen extends StatelessWidget {
               const SizedBox(height: 16),
               _buildTextField(label: "Username", icon: Icons.alternate_email),
               const SizedBox(height: 16),
-              _buildTextField(label: "Email Address", icon: Icons.email_outlined),
+              _buildTextField(
+                label: "Email Address",
+                icon: Icons.email_outlined,
+              ),
               const SizedBox(height: 16),
               _buildTextField(
                 label: "Password",
                 icon: Icons.lock_outline,
-                isPassword: true
+                isPassword: true,
               ),
 
               const SizedBox(height: 32),
@@ -88,7 +92,7 @@ class AuthLoginScreen extends StatelessWidget {
                         ),
                         recognizer: TapGestureRecognizer()
                           ..onTap = () {
-                          Navigator.pushNamed(context, '/register');
+                            AppRouter.toRegister(context);
                           },
                       ),
                     ],
@@ -105,7 +109,7 @@ class AuthLoginScreen extends StatelessWidget {
   Widget _buildTextField({
     required String label,
     required IconData icon,
-    bool isPassword = false
+    bool isPassword = false,
   }) {
     return TextField(
       obscureText: isPassword,

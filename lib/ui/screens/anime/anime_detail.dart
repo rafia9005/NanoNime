@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
-import '../../styles/colors.dart';
-import '../../models/anime.dart';
-import '../../services/anime.service.dart';
-import '../episode/episode_watch.dart';
+import '../../../core/theme/colors.dart';
+import '../../../data/models/anime.dart';
+import '../../../data/services/anime_service.dart';
+import '../../../core/router/app_router.dart';
 
 class AnimeDetailScreen extends StatefulWidget {
   final String id;
@@ -262,12 +262,9 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
                           }
 
                           if (episodeId.isNotEmpty) {
-                            Navigator.push(
+                            AppRouter.toEpisodeWatch(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    EpisodeWatchScreen(episodeId: episodeId),
-                              ),
+                              episodeId: episodeId,
                             );
                           } else {
                             ScaffoldMessenger.of(context).showSnackBar(
@@ -303,12 +300,10 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
                         final rec = anime.recommendedAnimeList[idx];
                         return GestureDetector(
                           onTap: () {
-                            Navigator.pushReplacement(
+                            AppRouter.toAnimeDetail(
                               context,
-                              MaterialPageRoute(
-                                builder: (_) =>
-                                    AnimeDetailScreen(id: rec.animeId),
-                              ),
+                              animeId: rec.animeId,
+                              replace: true,
                             );
                           },
                           child: SizedBox(

@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
-import 'package:nanonime/services/anime.service.dart';
-import '../models/anime.dart';
-import '../styles/colors.dart';
-import '../components/anime_card.dart';
-import '../components/loading_grid.dart';
+import 'package:nanonime/data/services/anime_service.dart';
+import '../../data/models/anime.dart';
+import '../../core/theme/colors.dart';
+import '../../core/router/app_router.dart';
+import '../widgets/anime_card.dart';
+import '../widgets/loading_grid.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -253,9 +254,9 @@ class _MainScreenState extends State<MainScreen> {
                             return AnimeCard(
                               anime: anime,
                               onTap: () {
-                                Navigator.pushNamed(
+                                AppRouter.toAnimeDetail(
                                   context,
-                                  '/anime/${anime.animeId}',
+                                  animeId: anime.animeId,
                                 );
                               },
                             );

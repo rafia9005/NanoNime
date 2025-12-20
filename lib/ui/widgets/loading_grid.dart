@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../styles/colors.dart';
+import '../../core/theme/colors.dart';
 
 /// A simple loading grid used as a placeholder while content is being fetched.
 ///

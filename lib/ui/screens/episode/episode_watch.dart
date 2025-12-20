@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 
-import '../../styles/colors.dart';
-import '../../models/anime.dart';
-import '../../services/anime.service.dart';
+import '../../../core/theme/colors.dart';
+import '../../../data/models/anime.dart';
+import '../../../data/services/anime_service.dart';
+import '../../../core/router/app_router.dart';
 
 /// Modern Clean Episode Watch Screen
 class EpisodeWatchScreen extends StatefulWidget {
@@ -155,14 +156,10 @@ class _EpisodeWatchScreenState extends State<EpisodeWatchScreen> {
               // Video Player
               SliverToBoxAdapter(child: _buildPlayer(detail)),
               // Episode Info
-              if (detail.releaseTime.isNotEmpty)
-                SliverToBoxAdapter(child: _buildInfoChip(detail.releaseTime)),
+              SliverToBoxAdapter(child: _buildEpisodeInfo(detail)),
               // Server Selection
               if (detail.serverQualities.isNotEmpty)
                 SliverToBoxAdapter(child: _buildServers(detail)),
-              // Episode Navigation
-              if (detail.hasPrevEpisode || detail.hasNextEpisode)
-                SliverToBoxAdapter(child: _buildNavigation(detail)),
               // Episode List
               SliverToBoxAdapter(child: _buildEpisodeList(detail)),
               // Downloads
@@ -184,7 +181,7 @@ class _EpisodeWatchScreenState extends State<EpisodeWatchScreen> {
       pinned: false,
       leading: IconButton(
         icon: const Icon(Icons.arrow_back_ios_new, size: 20),
-        onPressed: () => Navigator.pop(context),
+        onPressed: () => AppRouter.back(context),
       ),
       title: Text(
         detail.title,
@@ -285,25 +282,232 @@ class _EpisodeWatchScreenState extends State<EpisodeWatchScreen> {
     );
   }
 
-  Widget _buildInfoChip(String releaseTime) {
+  /// Build Episode Info Section
+  Widget _buildEpisodeInfo(EpisodeDetail detail) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      margin: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.card,
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppColors.border, width: 1),
       ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Icon(Icons.schedule, size: 16, color: Colors.white60),
-          const SizedBox(width: 8),
+          // Episode Title
           Text(
-            releaseTime,
-            style: const TextStyle(fontSize: 12, color: Colors.white70),
+            detail.title,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: AppColors.foreground,
+            ),
+          ),
+          const SizedBox(height: 12),
+
+          // Anime ID/Link
+          if (detail.animeId.isNotEmpty) ...[
+            _buildInfoRow(
+              icon: Icons.movie_outlined,
+              label: 'Anime',
+              value: detail.animeId,
+            ),
+            const SizedBox(height: 8),
+          ],
+
+          // Release Time
+          if (detail.releaseTime.isNotEmpty) ...[
+            _buildInfoRow(
+              icon: Icons.access_time,
+              label: 'Released',
+              value: detail.releaseTime,
+            ),
+            const SizedBox(height: 8),
+          ],
+
+          // Server Count
+          if (detail.serverQualities.isNotEmpty) ...[
+            _buildInfoRow(
+              icon: Icons.video_library,
+              label: 'Servers',
+              value: '${detail.serverQualities.length} quality options',
+            ),
+            const SizedBox(height: 8),
+          ],
+
+          // Download Options
+          if (detail.downloadList.isNotEmpty) ...[
+            _buildInfoRow(
+              icon: Icons.download,
+              label: 'Downloads',
+              value: '${detail.downloadList.length} quality options',
+            ),
+            const SizedBox(height: 8),
+          ],
+
+          // Navigation Buttons
+          if (detail.hasPrevEpisode || detail.hasNextEpisode) ...[
+            const SizedBox(height: 4),
+            const Divider(color: AppColors.border, height: 24),
+            const Text(
+              'Episode Navigation',
+              style: TextStyle(
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+                color: AppColors.mutedForeground,
+              ),
+            ),
+            const SizedBox(height: 12),
+          ],
+          Row(
+            children: [
+              if (detail.hasPrevEpisode) ...[
+                Expanded(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        AppRouter.toEpisodeWatch(
+                          context,
+                          episodeId: detail.prevEpisode!.episodeId,
+                          replace: true,
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppColors.secondary,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.3),
+                            width: 1,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              children: [
+                                const Icon(
+                                  Icons.arrow_back_ios_new,
+                                  size: 12,
+                                  color: AppColors.primary,
+                                ),
+                                const SizedBox(width: 4),
+                                const Text(
+                                  'Previous',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.mutedForeground,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+              if (detail.hasNextEpisode) ...[
+                Expanded(
+                  child: Material(
+                    color: Colors.transparent,
+                    child: InkWell(
+                      onTap: () {
+                        AppRouter.toEpisodeWatch(
+                          context,
+                          episodeId: detail.nextEpisode!.episodeId,
+                          replace: true,
+                        );
+                      },
+                      borderRadius: BorderRadius.circular(8),
+                      child: Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              AppColors.primary.withOpacity(0.15),
+                              AppColors.secondary,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(
+                            color: AppColors.primary.withOpacity(0.5),
+                            width: 1.5,
+                          ),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.end,
+                          children: [
+                            const Row(
+                              mainAxisAlignment: MainAxisAlignment.end,
+                              children: [
+                                Text(
+                                  'Next',
+                                  style: TextStyle(
+                                    fontSize: 10,
+                                    color: AppColors.primary,
+                                    fontWeight: FontWeight.w600,
+                                  ),
+                                ),
+                                SizedBox(width: 4),
+                                Icon(
+                                  Icons.arrow_forward_ios,
+                                  size: 12,
+                                  color: AppColors.primary,
+                                ),
+                              ],
+                            ),
+                            const SizedBox(height: 6),
+                          ],
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
+            ],
           ),
         ],
       ),
+    );
+  }
+
+  /// Build Info Row Helper
+  Widget _buildInfoRow({
+    required IconData icon,
+    required String label,
+    required String value,
+  }) {
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: AppColors.primary),
+        const SizedBox(width: 8),
+        Text(
+          '$label: ',
+          style: const TextStyle(
+            fontSize: 13,
+            color: AppColors.mutedForeground,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        Expanded(
+          child: Text(
+            value,
+            style: const TextStyle(fontSize: 13, color: AppColors.foreground),
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
     );
   }
 
@@ -424,116 +628,6 @@ class _EpisodeWatchScreenState extends State<EpisodeWatchScreen> {
     );
   }
 
-  Widget _buildNavigation(EpisodeDetail detail) {
-    final hasPrev = detail.hasPrevEpisode && detail.prevEpisode != null;
-    final hasNext = detail.hasNextEpisode && detail.nextEpisode != null;
-
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Row(
-        children: [
-          if (hasPrev)
-            Expanded(
-              child: _buildNavButton(
-                label: 'Previous',
-                subtitle: detail.prevEpisode!.title,
-                icon: Icons.arrow_back_ios_new,
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EpisodeWatchScreen(
-                        episodeId: detail.prevEpisode!.episodeId,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-          if (hasPrev && hasNext) const SizedBox(width: 12),
-          if (hasNext)
-            Expanded(
-              child: _buildNavButton(
-                label: 'Next',
-                subtitle: detail.nextEpisode!.title,
-                icon: Icons.arrow_forward_ios,
-                isNext: true,
-                onTap: () {
-                  Navigator.pushReplacement(
-                    context,
-                    MaterialPageRoute(
-                      builder: (_) => EpisodeWatchScreen(
-                        episodeId: detail.nextEpisode!.episodeId,
-                      ),
-                    ),
-                  );
-                },
-              ),
-            ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavButton({
-    required String label,
-    required String subtitle,
-    required IconData icon,
-    required VoidCallback onTap,
-    bool isNext = false,
-  }) {
-    return Material(
-      color: AppColors.card,
-      borderRadius: BorderRadius.circular(5),
-      child: InkWell(
-        borderRadius: BorderRadius.circular(5),
-        onTap: onTap,
-        child: Padding(
-          padding: const EdgeInsets.all(14),
-          child: Row(
-            children: [
-              if (!isNext) ...[
-                Icon(icon, size: 18, color: AppColors.primary),
-                const SizedBox(width: 10),
-              ],
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: isNext
-                      ? CrossAxisAlignment.end
-                      : CrossAxisAlignment.start,
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Text(
-                      label,
-                      style: const TextStyle(
-                        fontSize: 11,
-                        color: Colors.white54,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      subtitle,
-                      style: const TextStyle(
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ],
-                ),
-              ),
-              if (isNext) ...[
-                const SizedBox(width: 10),
-                Icon(icon, size: 18, color: AppColors.primary),
-              ],
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
   Widget _buildEpisodeList(EpisodeDetail detail) {
     final rawList = detail.info['episodeList'];
     if (rawList == null || rawList is! List) return const SizedBox.shrink();
@@ -605,11 +699,10 @@ class _EpisodeWatchScreenState extends State<EpisodeWatchScreen> {
                   }
                 }
                 if (epId != null && epId != widget.episodeId) {
-                  Navigator.pushReplacement(
+                  AppRouter.toEpisodeWatch(
                     context,
-                    MaterialPageRoute(
-                      builder: (_) => EpisodeWatchScreen(episodeId: epId!),
-                    ),
+                    episodeId: epId,
+                    replace: true,
                   );
                 }
               },
@@ -762,7 +855,7 @@ class _EpisodeWatchScreenState extends State<EpisodeWatchScreen> {
             ),
             const SizedBox(height: 24),
             ElevatedButton(
-              onPressed: () => Navigator.pop(context),
+              onPressed: () => AppRouter.back(context),
               style: ElevatedButton.styleFrom(
                 backgroundColor: AppColors.primary,
                 foregroundColor: Colors.white,
