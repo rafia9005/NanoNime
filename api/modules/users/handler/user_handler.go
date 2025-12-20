@@ -83,7 +83,7 @@ func (h *UserHandler) CreateUser(c echo.Context) error {
 		return c.JSON(http.StatusBadRequest, map[string]string{"error": err.Error()})
 	}
 
-	user := entity.NewUser(req.Name, req.Email, req.Password)
+	user := entity.NewUser(req.Name, req.Username, req.Email, req.Password)
 	err := h.userService.CreateUser(ctx, user)
 	if err != nil {
 		if err == service.ErrEmailAlreadyUsed {
@@ -125,6 +125,7 @@ func (h *UserHandler) UpdateUser(c echo.Context) error {
 	}
 
 	user.Name = req.Name
+	user.Username = req.Username
 	user.Email = req.Email
 	if req.Password != "" {
 		user.Password = req.Password

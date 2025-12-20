@@ -57,7 +57,7 @@ func (h *AuthHandler) Register(c echo.Context) error {
 
 	h.log.Debug("Request validated successfully:", req)
 
-	user := entity.NewUser(req.Name, req.Email, req.Password)
+	user := entity.NewUser(req.Name, req.Username, req.Email, req.Password)
 	err := h.authService.CreateUser(c.Request().Context(), user)
 	if err != nil {
 		if err == service.ErrEmailAlreadyUsed {
@@ -95,11 +95,11 @@ func (h *AuthHandler) Login(c echo.Context) error {
 
 	h.log.Debug("Request validated successfully:", req)
 
-	user, err := h.authService.ProcessLogin(c.Request().Context(), req.Email, req.Password)
+	user, err := h.authService.ProcessLogin(c.Request().Context(), req.Identity, req.Password)
 	if err != nil {
 		if err == service.ErrUserNotFound || err == service.ErrInvalidPassword {
-			h.log.Warn("Invalid email or password for:", req.Email)
-			return h.r.ErrorResponse(c, http.StatusUnauthorized, "Invalid email or password")
+			h.log.Warn("Invalid identity or password for:", req.Identity)
+			return h.r.ErrorResponse(c, http.StatusUnauthorized, "Invalid identity or password")
 		}
 		h.log.Error("Failed to process login:", err)
 		return h.r.ErrorResponse(c, http.StatusInternalServerError, err.Error())
@@ -108,9 +108,10 @@ func (h *AuthHandler) Login(c echo.Context) error {
 	h.log.Debug("User authenticated successfully:", user)
 
 	tokenData := map[string]interface{}{
-		"user_id": user.ID,
-		"email":   user.Email,
-		"name":    user.Name,
+		"user_id":  user.ID,
+		"name":     user.Name,
+		"username": user.Username,
+		"email":    user.Email,
 	}
 
 	token, err := h.jwt.GenerateToken(tokenData)

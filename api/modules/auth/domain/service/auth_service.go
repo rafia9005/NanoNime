@@ -57,14 +57,15 @@ func (s *AuthService) CreateUser(ctx context.Context, user *entity.User) error {
 }
 
 // ProcessLogin handles user login and password verification
-func (s *AuthService) ProcessLogin(ctx context.Context, email, password string) (*entity.User, error) {
+// identity can be either email or username
+func (s *AuthService) ProcessLogin(ctx context.Context, identity, password string) (*entity.User, error) {
 	// Validate input
-	if email == "" || password == "" {
-		return nil, errors.New("email and password cannot be empty")
+	if identity == "" || password == "" {
+		return nil, errors.New("identity and password cannot be empty")
 	}
 
-	// Find user by email
-	existingUser, err := s.userRepo.FindByEmail(ctx, email)
+	// Find user by email or username
+	existingUser, err := s.userRepo.FindByIdentity(ctx, identity)
 	if err != nil {
 		if err == repository.ERR_RECORD_NOT_FOUND {
 			return nil, ErrUserNotFound

@@ -7,6 +7,10 @@ cache_expired = 24
 cache_purged = 60
 api_version = "1"
 
+[anime_api]
+base_url = "http://localhost:3001"
+timeout = 30
+
 [database]
 db_driver = "mysql"
 db_host = "localhost"
