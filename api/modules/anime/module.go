@@ -3,6 +3,7 @@ package anime
 import (
 	"nanonime/internal/pkg/bus"
 	"nanonime/internal/pkg/logger"
+	"nanonime/internal/pkg/middleware"
 
 	"github.com/labstack/echo"
 	"gorm.io/gorm"
@@ -42,7 +43,7 @@ func (m *Module) RegisterRoutes(e *echo.Echo, basePath string) {
 	m.logger.Info("Registering anime routes at %s/anime", basePath)
 
 	// Create anime group: /api/v1/anime
-	animeGroup := e.Group(basePath + "/anime")
+	animeGroup := e.Group(basePath+"/anime", middleware.Auth)
 
 	// Health check endpoint
 	animeGroup.GET("/health", m.controller.HealthCheck)

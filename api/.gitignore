@@ -39,3 +39,4 @@ Thumbs.db
 *.iml
 
 tmp/
+bin/

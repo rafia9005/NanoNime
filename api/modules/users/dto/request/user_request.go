@@ -7,11 +7,20 @@ type LoginRequest struct {
 }
 
 // CreateUserRequest represents a request to create a user
+type RegisterRequest struct {
+	Name     string `json:"name" validate:"required"`
+	Username string `json:"username" validate:"required"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,min=6"`
+}
+
+// CreateUserRequest represents a request to create a user
 type CreateUserRequest struct {
 	Name     string `json:"name" validate:"required"`
 	Username string `json:"username" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"required,min=6"`
+	Role     string `json:"role" validate:"required"`
 }
 
 // UpdateUserRequest represents a request to update a user
@@ -20,6 +29,7 @@ type UpdateUserRequest struct {
 	Username string `json:"username" validate:"required"`
 	Email    string `json:"email" validate:"required,email"`
 	Password string `json:"password" validate:"omitempty,min=6"`
+	Role     string `json:"role" validate:"required"`
 }
 
 type ChnagePasswordRequest struct {

@@ -13,6 +13,7 @@ type UserResponse struct {
 	Name      string    `json:"name"`
 	Username  string    `json:"username"`
 	Email     string    `json:"email"`
+	Role      string    `json:"role"`
 	CreatedAt time.Time `json:"created_at"`
 	UpdatedAt time.Time `json:"updated_at"`
 }
@@ -36,4 +37,16 @@ func FromEntities(users []*entity.User) []*UserResponse {
 		userResponses[i] = FromEntity(user)
 	}
 	return userResponses
+}
+
+func FromEntityMe(user *entity.User) *UserResponse {
+	return &UserResponse{
+		ID:        user.ID,
+		Name:      user.Name,
+		Username:  user.Username,
+		Email:     user.Email,
+		Role:      user.Role,
+		CreatedAt: user.CreatedAt,
+		UpdatedAt: user.UpdatedAt,
+	}
 }

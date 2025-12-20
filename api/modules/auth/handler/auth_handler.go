@@ -44,7 +44,7 @@ func (h *AuthHandler) Handle(event bus.Event) {
 func (h *AuthHandler) Register(c echo.Context) error {
 	h.log.Info("Handling register request")
 
-	req := new(request.CreateUserRequest)
+	req := new(request.RegisterRequest)
 	if err := c.Bind(req); err != nil {
 		h.log.Error("Failed to bind request:", err)
 		return h.r.ErrorResponse(c, http.StatusBadRequest, err.Error())
