@@ -34,14 +34,23 @@ func Auth(next echo.HandlerFunc) echo.HandlerFunc {
 
 		token := strings.TrimPrefix(authHeader, "Bearer ")
 
-		claims, err := jwtService.ValidateToken(token)
-		if err != nil {
+		valid, err := jwtService.ValidateToken(token)
+		if err != nil || !valid {
 			return c.JSON(http.StatusUnauthorized, map[string]interface{}{
 				"error":   fmt.Sprintf("Invalid token: %v", err),
 				"message": "Unauthorized",
 			})
 		}
 
+		claims, err := jwtService.ParseToken(token)
+		if err != nil {
+			return c.JSON(http.StatusUnauthorized, map[string]interface{}{
+				"error":   fmt.Sprintf("Invalid token claims: %v", err),
+				"message": "Unauthorized",
+			})
+		}
+
+		fmt.Printf("[DEBUG] claims from ParseToken: %#v\n", claims)
 		c.Set("user", claims)
 
 		return next(c)

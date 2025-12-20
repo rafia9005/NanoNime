@@ -64,29 +64,33 @@ class _SplashScreenState extends State<SplashScreen>
       }
     });
 
-    _fadeOutController.addStatusListener((status) async {
+    _fadeOutController.addStatusListener((status) {
       if (status == AnimationStatus.completed) {
-        if (!mounted) return;
-        final prefs = await SharedPreferences.getInstance();
-        final token = prefs.getString('token');
-        print('TOKEN (Splash): $token');
-        if (token == null || token.isEmpty) {
-          print('Splash: Token kosong, redirect ke login');
-          AppRouter.toLogin(context, replace: true);
-        } else {
-          print('Splash: Token ditemukan, cek ke backend...');
-          final isLoggedIn = await Provider.of<AuthProvider>(context, listen: false).checkToken();
-          print('Splash: Hasil checkToken = $isLoggedIn');
-          if (isLoggedIn) {
-            AppRouter.toHome(context, replace: true);
-          } else {
-            AppRouter.toLogin(context, replace: true);
-          }
-        }
+        _handleNavigation();
       }
     });
 
     _introController.forward();
+  }
+
+  Future<void> _handleNavigation() async {
+    final prefs = await SharedPreferences.getInstance();
+    final token = prefs.getString('token');
+    if (!mounted) return;
+    if (token == null || token.isEmpty) {
+      AppRouter.toLogin(context, replace: true);
+    } else {
+      final isLoggedIn = await Provider.of<AuthProvider>(
+        context,
+        listen: false,
+      ).checkToken();
+      if (!mounted) return;
+      if (isLoggedIn) {
+        AppRouter.toHome(context, replace: true);
+      } else {
+        AppRouter.toLogin(context, replace: true);
+      }
+    }
   }
 
   @override

@@ -15,7 +15,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/golang-jwt/jwt"
+	"github.com/dgrijalva/jwt-go"
 	"github.com/labstack/echo"
 )
 
@@ -222,43 +222,60 @@ func (h *UserHandler) DeleteUser(c echo.Context) error {
 // @Failure      404 {object} utils.Response
 // @Failure      500 {object} utils.Response
 // @Security     BearerAuth
-// @Router       /user [get]
+// @Router       /user/token [get]
+
 func (h *UserHandler) GetMe(c echo.Context) error {
 	ctx := c.Request().Context()
 	claimsRaw := c.Get("user")
+	fmt.Printf("[DEBUG] claimsRaw type: %T, value: %#v\n", claimsRaw, claimsRaw)
+
 	var claims map[string]interface{}
 	switch v := claimsRaw.(type) {
 	case map[string]interface{}:
 		claims = v
+		fmt.Println("[DEBUG] claims as map[string]interface{}:", claims)
 	case jwt.MapClaims:
 		claims = map[string]interface{}(v)
+		fmt.Println("[DEBUG] claims as jwt.MapClaims:", claims)
 	default:
+		fmt.Println("[DEBUG] Invalid token claims type:", claimsRaw)
 		return h.resp.UnauthorizedResponse(c, "Invalid token claims")
 	}
+
 	userIDValue, ok := claims["user_id"]
+	fmt.Printf("[DEBUG] userIDValue: %v, exists: %v\n", userIDValue, ok)
 	if !ok {
 		return h.resp.UnauthorizedResponse(c, "User ID not found in token")
 	}
+
 	var userID uint
 	switch v := userIDValue.(type) {
 	case float64:
 		userID = uint(v)
+		fmt.Println("[DEBUG] userID from float64:", userID)
 	case string:
 		parsed, err := strconv.ParseUint(v, 10, 32)
 		if err != nil {
+			fmt.Println("[DEBUG] Error parsing userID string:", err)
 			return h.resp.UnauthorizedResponse(c, "Invalid user ID in token")
 		}
 		userID = uint(parsed)
+		fmt.Println("[DEBUG] userID from string:", userID)
 	default:
+		fmt.Println("[DEBUG] Invalid user ID type:", userIDValue)
 		return h.resp.UnauthorizedResponse(c, "Invalid user ID type in token")
 	}
+
 	user, err := h.userService.GetUserByID(ctx, userID)
 	if err != nil {
 		if err == service.ErrUserNotFound {
+			fmt.Println("[DEBUG] User not found for ID:", userID)
 			return h.resp.NotFoundResponse(c, "User not found")
 		}
+		fmt.Println("[DEBUG] Internal server error:", err)
 		return h.resp.InternalServerErrorResponse(c, err.Error())
 	}
+	fmt.Println("[DEBUG] Found user:", user)
 	return h.resp.SuccessResponse(c, response.FromEntityMe(user), "success")
 }
 
