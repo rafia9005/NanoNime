@@ -3,9 +3,21 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/gestures.dart';
 import 'package:nanonime/core/theme/colors.dart';
 import 'package:nanonime/core/router/app_router.dart';
+import 'package:provider/provider.dart';
+import 'package:nanonime/providers/auth_provider.dart';
 
-class AuthLoginScreen extends StatelessWidget {
+class AuthLoginScreen extends StatefulWidget {
   const AuthLoginScreen({super.key});
+
+  @override
+  State<AuthLoginScreen> createState() => _AuthLoginScreenState();
+}
+
+class _AuthLoginScreenState extends State<AuthLoginScreen> {
+  final emailController = TextEditingController();
+  final passwordController = TextEditingController();
+  bool loading = false;
+  String? error;
 
   @override
   Widget build(BuildContext context) {
@@ -35,27 +47,57 @@ class AuthLoginScreen extends StatelessWidget {
               ),
               const SizedBox(height: 40),
 
-              _buildTextField(label: "Full Name", icon: Icons.person_outline),
-              const SizedBox(height: 16),
-              _buildTextField(label: "Username", icon: Icons.alternate_email),
-              const SizedBox(height: 16),
               _buildTextField(
                 label: "Email Address",
                 icon: Icons.email_outlined,
+                controller: emailController,
               ),
               const SizedBox(height: 16),
               _buildTextField(
                 label: "Password",
                 icon: Icons.lock_outline,
                 isPassword: true,
+                controller: passwordController,
               ),
 
               const SizedBox(height: 32),
 
+              if (error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 12),
+                  child: Text(
+                    error!,
+                    style: const TextStyle(color: Colors.red),
+                  ),
+                ),
+
               ElevatedButton(
-                onPressed: () {
-                  print("Login Button Pressed!");
-                },
+                onPressed: loading
+                    ? null
+                    : () async {
+                        setState(() {
+                          loading = true;
+                          error = null;
+                        });
+                        try {
+                          await Provider.of<AuthProvider>(
+                            context,
+                            listen: false,
+                          ).login(
+                            emailController.text,
+                            passwordController.text,
+                          );
+                          AppRouter.toHome(context);
+                        } catch (e) {
+                          setState(() {
+                            error = e.toString();
+                          });
+                        } finally {
+                          setState(() {
+                            loading = false;
+                          });
+                        }
+                      },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.primary,
                   foregroundColor: Colors.white,
@@ -65,10 +107,15 @@ class AuthLoginScreen extends StatelessWidget {
                   ),
                   elevation: 0,
                 ),
-                child: const Text(
-                  "LOGIN",
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                ),
+                child: loading
+                    ? const CircularProgressIndicator(color: Colors.white)
+                    : const Text(
+                        "LOGIN",
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 16,
+                        ),
+                      ),
               ),
 
               const SizedBox(height: 16),
@@ -84,7 +131,7 @@ class AuthLoginScreen extends StatelessWidget {
                     children: [
                       const TextSpan(text: "Don't have an account? "),
                       TextSpan(
-                        text: "Login Now",
+                        text: "Register Now",
                         style: const TextStyle(
                           color: AppColors.primary,
                           fontWeight: FontWeight.bold,
@@ -110,8 +157,10 @@ class AuthLoginScreen extends StatelessWidget {
     required String label,
     required IconData icon,
     bool isPassword = false,
+    TextEditingController? controller,
   }) {
     return TextField(
+      controller: controller,
       obscureText: isPassword,
       style: const TextStyle(color: AppColors.foreground),
       decoration: InputDecoration(

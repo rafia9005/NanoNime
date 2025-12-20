@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nanonime/core/theme/colors.dart';
 import 'package:nanonime/core/router/app_router.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:provider/provider.dart';
+import 'package:nanonime/providers/auth_provider.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -22,6 +25,8 @@ class _SplashScreenState extends State<SplashScreen>
   @override
   void initState() {
     super.initState();
+
+    print('SplashScreen initState');
 
     _introController = AnimationController(
       vsync: this,
@@ -59,10 +64,24 @@ class _SplashScreenState extends State<SplashScreen>
       }
     });
 
-    _fadeOutController.addStatusListener((status) {
+    _fadeOutController.addStatusListener((status) async {
       if (status == AnimationStatus.completed) {
-        if (mounted) {
-          AppRouter.toHome(context, replace: true);
+        if (!mounted) return;
+        final prefs = await SharedPreferences.getInstance();
+        final token = prefs.getString('token');
+        print('TOKEN (Splash): $token');
+        if (token == null || token.isEmpty) {
+          print('Splash: Token kosong, redirect ke login');
+          AppRouter.toLogin(context, replace: true);
+        } else {
+          print('Splash: Token ditemukan, cek ke backend...');
+          final isLoggedIn = await Provider.of<AuthProvider>(context, listen: false).checkToken();
+          print('Splash: Hasil checkToken = $isLoggedIn');
+          if (isLoggedIn) {
+            AppRouter.toHome(context, replace: true);
+          } else {
+            AppRouter.toLogin(context, replace: true);
+          }
         }
       }
     });

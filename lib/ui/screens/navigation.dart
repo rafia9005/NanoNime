@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nanonime/ui/screens/favorite_screen.dart';
 import '../../core/theme/colors.dart';
 import 'main.dart';
 import 'search/search.dart';
@@ -18,6 +19,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
   final List<Widget> _screens = const [
     MainScreen(),
     SearchScreen(),
+    FavoriteScreen(),
     SettingsScreen(),
   ];
 

@@ -1,5 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../../../core/theme/colors.dart';
+import '../../../providers/auth_provider.dart';
+import '../../../core/router/app_router.dart';
 
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({Key? key}) : super(key: key);
@@ -126,6 +129,32 @@ class SettingsScreen extends StatelessWidget {
             ),
 
             const SizedBox(height: 32),
+
+            // Logout Button
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              child: ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                  foregroundColor: Colors.white,
+                  minimumSize: const Size(double.infinity, 48),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+                icon: const Icon(Icons.logout),
+                label: const Text('Logout', style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () async {
+                  // Import provider/provider.dart dan AppRouter di atas file ini!
+                  // ignore: use_build_context_synchronously
+                  final provider = Provider.of<AuthProvider>(context, listen: false);
+                  await provider.logout();
+                  // ignore: use_build_context_synchronously
+                  AppRouter.toLogin(context, replace: true);
+                },
+              ),
+            ),
+
             // Footer
             Center(
               child: Text(

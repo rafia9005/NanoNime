@@ -1,16 +1,25 @@
 import 'dart:ui';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:nanonime/providers/auth_provider.dart';
 import 'package:nanonime/ui/screens/splash.dart';
 import 'package:nanonime/core/theme/colors.dart';
+import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  final perfs = await SharedPreferences.getInstance();
+  final token = perfs.getString('token');
+  print(token);
   await dotenv.load(fileName: ".env");
-  runApp(const Runner());
+  runApp(
+    ChangeNotifierProvider(
+      create: (_) => AuthProvider(),
+      child: const Runner(),
+    ),
+  );
 }
 
 class Runner extends StatelessWidget {

@@ -1,16 +1,12 @@
 import 'dart:convert';
 
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:http/http.dart' as http;
 import '../models/anime.dart';
+import '../../utils/fetch.dart';
 
 class ApiService {
-  static String baseUrl = dotenv.get("API_URL");
-
   /// Fetch list of ongoing anime.
   Future<List<Anime>> fetchOngoingAnime() async {
-    final uri = Uri.parse('$baseUrl/otakudesu/home');
-    final response = await http.get(uri);
+    final response = await Fetch.get('/anime/home');
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -29,8 +25,7 @@ class ApiService {
 
   /// Fetch detailed info for an anime by its id/slug.
   Future<AnimeDetail> fetchAnimeDetail(String id) async {
-    final uri = Uri.parse('$baseUrl/otakudesu/anime/$id');
-    final response = await http.get(uri);
+    final response = await Fetch.get('/anime/anime/$id');
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -55,8 +50,7 @@ class ApiService {
 
   /// Fetch episode detail by episodeId (slug).
   Future<EpisodeDetail> fetchEpisodeDetail(String episodeId) async {
-    final uri = Uri.parse('$baseUrl/otakudesu/episode/$episodeId');
-    final response = await http.get(uri);
+    final response = await Fetch.get('/anime/episode/$episodeId');
 
     if (response.statusCode != 200) {
       throw Exception(
@@ -72,7 +66,7 @@ class ApiService {
   }
 
   /// Resolve a serverId to a streaming URL by calling the backend endpoint:
-  ///   GET {baseUrl}/otakudesu/server/<serverId>
+  ///   GET /anime/server/<serverId>
   ///
   /// Returns the resolved URL string on success, or null if resolution fails.
   Future<String?> resolveServerUrl(String serverId) async {
@@ -80,9 +74,7 @@ class ApiService {
 
     // serverId may contain characters that need encoding when used in a path segment
     final encoded = Uri.encodeComponent(serverId);
-    final uri = Uri.parse('$baseUrl/otakudesu/server/$encoded');
-
-    final response = await http.get(uri);
+    final response = await Fetch.get('/anime/server/$encoded');
 
     if (response.statusCode != 200) {
       // Caller can decide how to handle null (show error / fallback)
@@ -111,10 +103,7 @@ class ApiService {
       return [];
     }
 
-    final uri = Uri.parse(
-      '$baseUrl/otakudesu/search',
-    ).replace(queryParameters: {'q': query});
-    final response = await http.get(uri);
+    final response = await Fetch.get('/anime/search?q=$query');
 
     if (response.statusCode != 200) {
       throw Exception(
