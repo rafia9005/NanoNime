@@ -4,7 +4,7 @@ import '../models/anime.dart';
 import '../../utils/fetch.dart';
 
 class ApiService {
-  /// Fetch list of ongoing anime.
+  /// Fetch list of ongoing anime (for grid).
   Future<List<Anime>> fetchOngoingAnime() async {
     final response = await Fetch.get('/anime/home');
 
@@ -17,6 +17,25 @@ class ApiService {
     final Map<String, dynamic> body = jsonDecode(response.body);
     final List<dynamic> list =
         (body['data']?['ongoing']?['animeList']) as List<dynamic>? ?? [];
+
+    return list
+        .map((item) => Anime.fromJson(Map<String, dynamic>.from(item)))
+        .toList();
+  }
+
+  /// Fetch list of ongoing anime for slider (from /anime/ongoing).
+  Future<List<Anime>> fetchOngoingAnimeSlider() async {
+    final response = await Fetch.get('/anime/ongoing');
+
+    if (response.statusCode != 200) {
+      throw Exception(
+        'fetchOngoingAnimeSlider failed: ${response.statusCode} ${response.reasonPhrase}',
+      );
+    }
+
+    final Map<String, dynamic> body = jsonDecode(response.body);
+    final List<dynamic> list =
+        (body['data']?['animeList']) as List<dynamic>? ?? [];
 
     return list
         .map((item) => Anime.fromJson(Map<String, dynamic>.from(item)))

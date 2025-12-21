@@ -95,27 +95,29 @@ class AnimeCard extends StatelessWidget {
                     ),
                     const Spacer(),
                     // Release date / meta row
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.schedule,
-                          size: 11,
-                          color: Colors.grey.shade500,
-                        ),
-                        const SizedBox(width: 6),
-                        Expanded(
-                          child: Text(
-                            anime.latestReleaseDate,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 9,
-                              color: Colors.grey.shade500,
+                    if (anime.latestReleaseDate != "" &&
+                        anime.latestReleaseDate.trim().isNotEmpty)
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.schedule,
+                            size: 11,
+                            color: Colors.grey.shade500,
+                          ),
+                          const SizedBox(width: 6),
+                          Expanded(
+                            child: Text(
+                              anime.latestReleaseDate,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 9,
+                                color: Colors.grey.shade500,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
                   ],
                 ),
               ),

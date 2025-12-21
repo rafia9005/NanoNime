@@ -5,6 +5,7 @@ import '../../core/theme/colors.dart';
 import '../../core/router/app_router.dart';
 import '../widgets/anime_card.dart';
 import '../widgets/loading_grid.dart';
+import 'package:nanonime/ui/widgets/ongoing_anime_slider.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -56,14 +57,12 @@ class _MainScreenState extends State<MainScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
-    double maxCrossAxisExtent = screenWidth > 400 ? 180 : screenWidth / 2 - 20;
-
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
         child: Column(
           children: [
+            // Header tetap fixed
             Container(
               padding: const EdgeInsets.all(16),
               child: Column(
@@ -154,93 +153,96 @@ class _MainScreenState extends State<MainScreen> {
                 ],
               ),
             ),
-            // Anime Grid
+            // Konten scrollable (slider + grid)
             Expanded(
-              child: animeListFuture == null
-                  ? const Center(child: CircularProgressIndicator())
-                  : FutureBuilder<List<Anime>>(
-                      future: animeListFuture,
-                      builder: (context, snapshot) {
-                        if (snapshot.connectionState ==
-                            ConnectionState.waiting) {
-                          return LoadingGrid(
-                            maxCrossAxisExtent: maxCrossAxisExtent,
-                          );
-                        }
-                        if (snapshot.hasError) {
-                          return Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.error_outline,
-                                  size: 48,
-                                  color: Colors.grey.shade600,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  "Failed to load anime",
-                                  style: TextStyle(
-                                    color: Colors.grey.shade400,
-                                    fontSize: 16,
-                                  ),
-                                ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  _getCleanErrorMessage(snapshot.error!),
-                                  style: TextStyle(
-                                    color: Colors.grey.shade600,
-                                    fontSize: 12,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                const SizedBox(height: 16),
-                              ],
+              child: FutureBuilder<List<Anime>>(
+                future: animeListFuture,
+                builder: (context, snapshot) {
+                  final screenWidth = MediaQuery.of(context).size.width;
+                  double maxCrossAxisExtent = screenWidth > 400
+                      ? 180
+                      : screenWidth / 2 - 20;
+
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return LoadingGrid(maxCrossAxisExtent: maxCrossAxisExtent);
+                  }
+                  if (snapshot.hasError) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.error_outline,
+                            size: 48,
+                            color: Colors.grey.shade600,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            "Failed to load anime",
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 16,
                             ),
-                          );
-                        }
-
-                        final animes = snapshot.data!;
-
-                        if (animes.isEmpty) {
-                          return Center(
-                            child: Column(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  Icons.search_off,
-                                  size: 64,
-                                  color: Colors.grey.shade600,
-                                ),
-                                const SizedBox(height: 16),
-                                Text(
-                                  _isSearching
-                                      ? 'No results found for "$_currentQuery"'
-                                      : 'No anime available',
-                                  style: TextStyle(
-                                    color: Colors.grey.shade400,
-                                    fontSize: 16,
-                                  ),
-                                  textAlign: TextAlign.center,
-                                ),
-                                if (_isSearching) ...[
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    'Try a different search term',
-                                    style: TextStyle(
-                                      color: Colors.grey.shade600,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
-                              ],
+                          ),
+                          const SizedBox(height: 8),
+                          Text(
+                            _getCleanErrorMessage(snapshot.error!),
+                            style: TextStyle(
+                              color: Colors.grey.shade600,
+                              fontSize: 12,
                             ),
-                          );
-                        }
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      ),
+                    );
+                  }
 
-                        return GridView.builder(
-                          padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
-                          physics: const BouncingScrollPhysics(),
+                  final animes = snapshot.data ?? [];
+
+                  if (animes.isEmpty) {
+                    return Center(
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            Icons.search_off,
+                            size: 64,
+                            color: Colors.grey.shade600,
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            _isSearching
+                                ? 'No results found for "$_currentQuery"'
+                                : 'No anime available',
+                            style: TextStyle(
+                              color: Colors.grey.shade400,
+                              fontSize: 16,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          if (_isSearching) ...[
+                            const SizedBox(height: 8),
+                            Text(
+                              'Try a different search term',
+                              style: TextStyle(
+                                color: Colors.grey.shade600,
+                                fontSize: 12,
+                              ),
+                            ),
+                          ],
+                        ],
+                      ),
+                    );
+                  }
+
+                  return CustomScrollView(
+                    slivers: [
+                      SliverToBoxAdapter(child: const OngoingAnimeSlider()),
+                      SliverPadding(
+                        padding: const EdgeInsets.fromLTRB(12, 0, 12, 12),
+                        sliver: SliverGrid(
                           gridDelegate:
                               SliverGridDelegateWithMaxCrossAxisExtent(
                                 maxCrossAxisExtent: maxCrossAxisExtent,
@@ -248,8 +250,10 @@ class _MainScreenState extends State<MainScreen> {
                                 crossAxisSpacing: 12,
                                 childAspectRatio: 0.55,
                               ),
-                          itemCount: animes.length,
-                          itemBuilder: (context, index) {
+                          delegate: SliverChildBuilderDelegate((
+                            context,
+                            index,
+                          ) {
                             final anime = animes[index];
                             return AnimeCard(
                               anime: anime,
@@ -260,10 +264,13 @@ class _MainScreenState extends State<MainScreen> {
                                 );
                               },
                             );
-                          },
-                        );
-                      },
-                    ),
+                          }, childCount: animes.length),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
             ),
           ],
         ),
