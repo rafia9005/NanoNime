@@ -18,6 +18,11 @@ jobs:
               with:
                   flutter-version: "3.38.5"
 
+            - name: Generate .env from GitHub Actions env
+              run: |
+                  echo "API_URL=${{ secrets.API_URL }}" > .env
+                  echo "API_VERSION=${{ secrets.API_VERSION }}" >> .env
+
             - name: Install dependencies
               run: flutter pub get
 
