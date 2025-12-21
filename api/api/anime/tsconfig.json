@@ -1,0 +1,34 @@
+{
+	"compilerOptions": {
+		"rootDir": "./src",
+		"outDir": "./dist",
+		"baseUrl": ".",
+		"module": "nodenext",
+		"moduleResolution": "nodenext",
+		"target": "esnext",
+		"lib": ["esnext"],
+		"types": ["node"],
+		"noUncheckedIndexedAccess": true,
+		"exactOptionalPropertyTypes": true,
+		"strict": true,
+		"jsx": "react-jsx",
+		"verbatimModuleSyntax": true,
+		"isolatedModules": true,
+		"noUncheckedSideEffectImports": true,
+		"moduleDetection": "force",
+		"skipLibCheck": true,
+		"paths": {
+			"@configs/*": ["src/configs/*"],
+			"@controllers/*": ["src/controllers/*"],
+			"@helpers/*": ["src/helpers/*"],
+			"@interfaces/*": ["src/interfaces/*"],
+			"@middlewares/*": ["src/middlewares/*"],
+			"@parsers/*": ["src/parsers/*"],
+			"@routes/*": ["src/routes/*"],
+			"@schemas/*": ["src/schemas/*"],
+			"@scrapers/*": ["src/scrapers/*"]
+		}
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist"]
+}

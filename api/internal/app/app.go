@@ -69,7 +69,10 @@ func (a *App) Initialize() error {
 	a.r = a.SetRouter()
 	a.r.Use(middleware.Logger())
 	a.r.Use(middleware.Recover())
-	a.r.Use(middleware.CORS())
+	a.r.Use(middleware.CORSWithConfig(middleware.CORSConfig{
+		AllowOrigins: []string{"*"},
+		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.HEAD},
+	}))
 
 	// validate request
 	a.r.Validator = _validator.NewCustomValidator()

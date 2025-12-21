@@ -62,6 +62,33 @@ func (r UserRepositoryImpl) Update(ctx context.Context, user *entity.User) error
 	return database.DB.WithContext(ctx).Save(user).Error
 }
 
+// FindByUsername implements UserRepository.
+func (r UserRepositoryImpl) FindByUsername(ctx context.Context, username string) (*entity.User, error) {
+	var user entity.User
+	result := database.DB.WithContext(ctx).Where("username = ?", username).First(&user)
+	if result.Error != nil {
+		if result.RowsAffected == 0 {
+			return nil, ERR_RECORD_NOT_FOUND
+		}
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
+// FindByIdentity implements UserRepository.
+// Finds user by email or username
+func (r UserRepositoryImpl) FindByIdentity(ctx context.Context, identity string) (*entity.User, error) {
+	var user entity.User
+	result := database.DB.WithContext(ctx).Where("email = ? OR username = ?", identity, identity).First(&user)
+	if result.Error != nil {
+		if result.RowsAffected == 0 {
+			return nil, ERR_RECORD_NOT_FOUND
+		}
+		return nil, result.Error
+	}
+	return &user, nil
+}
+
 func NewUserRepositoryImpl() UserRepository {
 	return UserRepositoryImpl{}
 }

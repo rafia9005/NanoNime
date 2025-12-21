@@ -8,6 +8,7 @@ import (
 type User struct {
 	ID        uint      `gorm:"primaryKey" json:"id"`
 	Name      string    `json:"name"`
+	Username  string    `json:"username"`
 	Email     string    `json:"email"`
 	Role      string    `json:"role" gorm:"type:enum('admin', 'user');default:'user'"`
 	Password  string    `json:"-"`
@@ -21,10 +22,11 @@ func (*User) TableName() string {
 }
 
 // NewUser creates a new user
-func NewUser(name, email, password string) *User {
+func NewUser(name, username, email, password string) *User {
 	now := time.Now()
 	return &User{
 		Name:      name,
+		Username:  username,
 		Email:     email,
 		Password:  password,
 		CreatedAt: now,

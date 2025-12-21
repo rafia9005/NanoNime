@@ -2,13 +2,14 @@ package main
 
 import (
 	"flag"
+	"log"
 	"nanonime/internal/app"
 	"nanonime/internal/pkg/config"
 	"nanonime/internal/pkg/logger"
 	"nanonime/internal/pkg/middleware"
+	"nanonime/modules/anime"
 	"nanonime/modules/auth"
 	user "nanonime/modules/users"
-	"log"
 	"os"
 )
 
@@ -45,6 +46,7 @@ func main() {
 	// register modules
 	app.RegisterModule(user.NewModule())
 	app.RegisterModule(auth.NewModule())
+	app.RegisterModule(anime.NewModule())
 
 	// initialize the application
 	if err := app.Initialize(); err != nil {

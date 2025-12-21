@@ -1,7 +1,6 @@
 logs/
 config.toml
 config-prod.toml
-main
 
 # Terraform-specific files
 *.tfstate
@@ -37,3 +36,6 @@ Thumbs.db
 .vscode/
 .idea/
 *.iml
+
+tmp/
+bin/
