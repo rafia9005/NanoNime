@@ -27,3 +27,7 @@ conn_lifetime = 60
 [jwt]
 day_expired = 60
 signature_key = "4WSRLWxJdm"
+
+[manga]
+base_url = "http://localhost:3002"
+timeout = 30

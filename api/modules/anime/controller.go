@@ -23,7 +23,7 @@ type Controller struct {
 func NewController() *Controller {
 	baseURL := config.GetString("anime_api.base_url")
 	if baseURL == "" {
-		baseURL = "http://localhost:3001"
+		panic("anime base url not found")
 	}
 
 	timeout := config.GetInt("anime_api.timeout")
