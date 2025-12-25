@@ -1,4 +1,4 @@
-package manga
+package chapter
 
 import (
 	"nanonime/internal/pkg/bus"
@@ -8,7 +8,7 @@ import (
 	"gorm.io/gorm"
 )
 
-// Module implements the application Module interface for the manga module
+// Module implements the application Module interface for the chapter module
 type Module struct {
 	db         *gorm.DB
 	logger     *logger.Logger
@@ -18,7 +18,7 @@ type Module struct {
 
 // Name returns the name of the module
 func (m *Module) Name() string {
-	return "manga"
+	return "chapter"
 }
 
 // Initialize initializes the module
@@ -27,35 +27,35 @@ func (m *Module) Initialize(db *gorm.DB, log *logger.Logger, event *bus.EventBus
 	m.logger = log
 	m.event = event
 
-	m.logger.Info("Initializing manga module")
+	m.logger.Info("Initializing chapter module")
 
-	// Initialize manga controller (proxy to manga API)
+	// Initialize chapter controller (proxy to chapter API)
 	m.controller = NewController()
-	m.logger.Debug("Manga controller initialized")
+	m.logger.Debug("Chapter controller initialized")
 
-	m.logger.Info("Manga module initialized successfully")
+	m.logger.Info("Chapter module initialized successfully")
 	return nil
 }
 
 // RegisterRoutes registers the module's routes
 func (m *Module) RegisterRoutes(e *echo.Echo, basePath string) {
-	m.logger.Info("Registering manga routes at %s/manga", basePath)
+	m.logger.Info("Registering chapter routes at %s/chapter", basePath)
 
-	// Create manga group: /api/v1/manga
-	mangaGroup := e.Group(basePath + "/manga")
+	// Create chapter group: /api/v1/chapter
+	chapterGroup := e.Group(basePath + "/chapter")
 
 	// Health check endpoint
-	mangaGroup.GET("/health", m.controller.HealthCheck)
+	chapterGroup.GET("/health", m.controller.HealthCheck)
 
-	// Proxy all other requests to manga API
-	mangaGroup.Any("/*", m.controller.ProxyHandler)
+	// Proxy all other requests to chapter API
+	chapterGroup.Any("/*", m.controller.ProxyHandler)
 
-	m.logger.Debug("Manga routes registered successfully")
+	m.logger.Debug("Chapter routes registered successfully")
 }
 
 // Migrations returns the module's migrations
 func (m *Module) Migrations() error {
-	m.logger.Info("Manga module has no database migrations")
+	m.logger.Info("Chapter module has no database migrations")
 	return nil
 }
 
@@ -64,7 +64,7 @@ func (m *Module) Logger() *logger.Logger {
 	return m.logger
 }
 
-// NewModule creates a new manga module
+// NewModule creates a new chapter module
 func NewModule() *Module {
 	return &Module{}
 }

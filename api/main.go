@@ -9,6 +9,7 @@ import (
 	"nanonime/internal/pkg/middleware"
 	"nanonime/modules/anime"
 	"nanonime/modules/auth"
+	"nanonime/modules/chapter"
 	"nanonime/modules/manga"
 	user "nanonime/modules/users"
 	"os"
@@ -49,6 +50,7 @@ func main() {
 	app.RegisterModule(auth.NewModule())
 	app.RegisterModule(anime.NewModule())
 	app.RegisterModule(manga.NewModule())
+	app.RegisterModule(chapter.NewModule())
 
 	// initialize the application
 	if err := app.Initialize(); err != nil {

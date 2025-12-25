@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nanonime/ui/screens/favorite_screen.dart';
+import 'package:nanonime/ui/screens/manga/manga.dart';
 import 'package:nanonime/ui/screens/schedule/schedule.dart';
 import '../../core/theme/colors.dart';
 import 'main.dart';
@@ -19,14 +19,14 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
   final List<Widget> _screens = [
     MainScreen(),
     ScheduleScreen(),
-    FavoriteScreen(),
+    MangaScreen(),
     SettingsScreen(),
   ];
 
   final List<_NavItemData> _navItems = const [
     _NavItemData(icon: Icons.home_rounded, label: 'Home'),
     _NavItemData(icon: Icons.lock_clock_rounded, label: 'Schedule'),
-    _NavItemData(icon: Icons.favorite_rounded, label: 'Favorites'),
+    _NavItemData(icon: Icons.book_rounded, label: 'Manga'),
     _NavItemData(icon: Icons.settings_rounded, label: 'Settings'),
   ];
 

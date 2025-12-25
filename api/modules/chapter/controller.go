@@ -1,4 +1,4 @@
-package manga
+package chapter
 
 import (
 	"io"
@@ -38,7 +38,7 @@ func NewController() *Controller {
 		},
 	}
 
-	log, _ := logger.NewLogger(logger.DefaultConfig(), "manga")
+	log, _ := logger.NewLogger(logger.DefaultConfig(), "chapter")
 
 	return &Controller{
 		baseURL: baseURL,
@@ -48,20 +48,20 @@ func NewController() *Controller {
 	}
 }
 
-// ProxyHandler handles reverse proxy to manga API
+// ProxyHandler handles reverse proxy to manga API for chapter endpoints
 func (c *Controller) ProxyHandler(ctx echo.Context) error {
-	// Get the path after /api/v1/manga
+	// Get the path after /api/v1/chapter
 	requestPath := ctx.Request().URL.Path
 
-	// Remove /api/v1/manga prefix
-	targetPath := strings.TrimPrefix(requestPath, "/api/v1/manga")
+	// Remove /api/v1/chapter prefix
+	targetPath := strings.TrimPrefix(requestPath, "/api/v1/chapter")
 	if targetPath == "" {
 		targetPath = "/"
 	}
 	if !strings.HasPrefix(targetPath, "/") {
 		targetPath = "/" + targetPath
 	}
-	proxyPath := "/api/manga" + targetPath
+	proxyPath := "/api/chapter" + targetPath
 
 	// Build target URL
 	targetURL, err := url.Parse(c.baseURL + proxyPath)
@@ -99,7 +99,7 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	proxyReq.Header.Set("X-Forwarded-Host", ctx.Request().Host)
 
 	// Log request
-	c.logger.Info("Proxying request",
+	c.logger.Info("Proxying chapter request",
 		"method", ctx.Request().Method,
 		"from", requestPath,
 		"to", targetURL.String(),
@@ -134,7 +134,7 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 		return err
 	}
 
-	c.logger.Info("Proxy response",
+	c.logger.Info("Proxy chapter response",
 		"status", resp.StatusCode,
 		"url", targetURL.String(),
 	)
@@ -142,7 +142,7 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	return nil
 }
 
-// HealthCheck checks if the manga API is reachable
+// HealthCheck checks if the manga API chapter endpoint is reachable
 func (c *Controller) HealthCheck(ctx echo.Context) error {
 	targetURL := c.baseURL + "/health"
 
