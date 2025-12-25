@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:nanonime/ui/screens/favorite_screen.dart';
+import 'package:nanonime/ui/screens/schedule/schedule.dart';
 import '../../core/theme/colors.dart';
 import 'main.dart';
-import 'search/search.dart';
 import 'settings/settings.dart';
 
 /// Main navigation wrapper with ultra-modern bottom navigation bar
@@ -16,16 +16,16 @@ class NavigationWrapper extends StatefulWidget {
 class _NavigationWrapperState extends State<NavigationWrapper> {
   int _currentIndex = 0;
 
-  final List<Widget> _screens = const [
+  final List<Widget> _screens = [
     MainScreen(),
-    SearchScreen(),
+    ScheduleScreen(),
     FavoriteScreen(),
     SettingsScreen(),
   ];
 
   final List<_NavItemData> _navItems = const [
     _NavItemData(icon: Icons.home_rounded, label: 'Home'),
-    _NavItemData(icon: Icons.search_rounded, label: 'Search'),
+    _NavItemData(icon: Icons.lock_clock_rounded, label: 'Schedule'),
     _NavItemData(icon: Icons.favorite_rounded, label: 'Favorites'),
     _NavItemData(icon: Icons.settings_rounded, label: 'Settings'),
   ];

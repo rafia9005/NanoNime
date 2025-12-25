@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import '../models/anime.dart';
+import 'package:nanonime/data/models/anime.dart';
 import '../../utils/fetch.dart';
 
 class ApiService {
@@ -65,6 +65,19 @@ class ApiService {
         : data;
 
     return AnimeDetail.fromJson(detailsMap);
+  }
+
+  /// Fetch anime schedule from /anime/schedule endpoint.
+  Future<List<AnimeScheduleDay>> fetchSchedule() async {
+    final res = await Fetch.get('/anime/schedule');
+    if (res.statusCode != 200) {
+      throw Exception('Failed to fetch schedule');
+    }
+    final json = jsonDecode(res.body);
+    final list = (json['data']['scheduleList'] as List)
+        .map((e) => AnimeScheduleDay.fromJson(e))
+        .toList();
+    return list;
   }
 
   /// Fetch episode detail by episodeId (slug).

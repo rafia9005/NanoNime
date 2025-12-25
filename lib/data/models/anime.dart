@@ -29,6 +29,40 @@ class Anime {
   }
 }
 
+class AnimeScheduleDay {
+  final String title;
+  final List<AnimeScheduleItem> animeList;
+
+  AnimeScheduleDay({required this.title, required this.animeList});
+
+  factory AnimeScheduleDay.fromJson(Map<String, dynamic> json) {
+    final list = (json['animeList'] as List)
+        .map((e) => AnimeScheduleItem.fromJson(e))
+        .toList();
+    return AnimeScheduleDay(title: json['title'] ?? '', animeList: list);
+  }
+}
+
+class AnimeScheduleItem {
+  final String title;
+  final String animeId;
+  final String otakudesuUrl;
+
+  AnimeScheduleItem({
+    required this.title,
+    required this.animeId,
+    required this.otakudesuUrl,
+  });
+
+  factory AnimeScheduleItem.fromJson(Map<String, dynamic> json) {
+    return AnimeScheduleItem(
+      title: json['title'] ?? '',
+      animeId: json['animeId'] ?? '',
+      otakudesuUrl: json['otakudesuUrl'] ?? '',
+    );
+  }
+}
+
 class AnimeDetail {
   final String title;
   final String japanese;

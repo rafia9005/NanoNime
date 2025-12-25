@@ -10,7 +10,7 @@
 /// - Simplifies testing with mock repositories
 /// - Centralizes data logic
 
-import '../models/anime.dart';
+import 'package:nanonime/data/models/anime.dart';
 import '../services/anime_service.dart';
 
 class AnimeRepository {
@@ -22,6 +22,11 @@ class AnimeRepository {
 
   AnimeRepository({ApiService? apiService})
     : _apiService = apiService ?? ApiService();
+
+  /// Fetch anime schedule
+  Future<List<AnimeScheduleDay>> getSchedule() async {
+    return await _apiService.fetchSchedule();
+  }
 
   /// Fetch ongoing anime with optional caching
   Future<List<Anime>> getOngoingAnime({bool forceRefresh = false}) async {

@@ -5,7 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Fetch {
   static final String _baseUrl = dotenv.get("API_URL");
-  static final String _apiVersion = dotenv.get("API_VERSION") ?? "1";
+  static final String _apiVersion = dotenv.get("API_VERSION");
 
   /// Build the full URL by prepending `/api/v{version}` if not already present.
   static String buildUrl(String path) {
