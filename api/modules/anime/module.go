@@ -47,6 +47,9 @@ func (m *Module) RegisterRoutes(e *echo.Echo, basePath string) {
 	// Health check endpoint
 	animeGroup.GET("/health", m.controller.HealthCheck)
 
+	// Image proxy
+	animeGroup.GET("/image", m.controller.ImageProxyHandler)
+
 	// Proxy all other requests to otakudesu API
 	// Examples:
 	//   GET /api/v1/anime/home -> http://localhost:3001/otakudesu/home

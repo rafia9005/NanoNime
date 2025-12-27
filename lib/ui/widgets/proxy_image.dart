@@ -23,7 +23,12 @@ class ProxyImage extends StatelessWidget {
   static ImageProvider provider(String url) {
     if (kIsWeb && url.isNotEmpty) {
       // Using local Go backend proxy to bypass WAF/CORS issues securely.
-      final baseUrl = '${dotenv.env['API_URL'] ?? 'http://localhost:8080'}/api/v1/manga/image'; 
+      String path = '/api/v1/manga/image';
+      if (url.contains('otakudesu')) {
+        path = '/api/v1/anime/image';
+      }
+      final baseUrl =
+          '${dotenv.env['API_URL'] ?? 'http://localhost:8080'}$path';
       return NetworkImage('$baseUrl?url=${Uri.encodeComponent(url)}');
     }
     return NetworkImage(url);

@@ -1,7 +1,6 @@
 package anime
 
 import (
-	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -118,29 +117,73 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	}
 	defer resp.Body.Close()
 
-	// Copy response headers
-	for key, values := range resp.Header {
-		for _, value := range values {
-			ctx.Response().Header().Add(key, value)
-		}
+	// Do NOT copy headers blindly to avoid duplicate CORS headers
+	// Copy specific safe headers if needed, or rely on content sniffing?
+	// For API proxy, we usually want Content-Type.
+	contentType := resp.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/json" // Default Assumption
+	}
+	
+	// Stream the body with the correct status code and content type.
+	// We deliberately do not copy Allow-Origin etc from upstream.
+	return ctx.Stream(resp.StatusCode, contentType, resp.Body)
+}
+
+// ImageProxyHandler proxies valid image requests to bypass CORS and Referer checks for Anime
+func (c *Controller) ImageProxyHandler(ctx echo.Context) error {
+	imageURL := ctx.QueryParam("url")
+	if imageURL == "" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Missing url parameter"})
 	}
 
-	// Set status code
-	ctx.Response().WriteHeader(resp.StatusCode)
+	// Validate URL
+	parsedURL, err := url.Parse(imageURL)
+	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid URL"})
+	}
 
-	// Copy response body
-	_, err = io.Copy(ctx.Response().Writer, resp.Body)
+	req, err := http.NewRequest("GET", imageURL, nil)
 	if err != nil {
-		c.logger.Error("Failed to copy response body", "error", err)
-		return err
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create request"})
 	}
 
-	c.logger.Info("Proxy response",
-		"status", resp.StatusCode,
-		"url", targetURL.String(),
-	)
+	// Set headers for Otakudesu
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
+	// Use the host of the image as referer, frequently works better for CDNs
+	req.Header.Set("Referer", parsedURL.Scheme + "://" + parsedURL.Host + "/")
+	
+	// Create a new client to ensure we follow redirects (c.client disables them)
+	client := &http.Client{
+		Timeout: 15 * time.Second,
+	}
 
-	return nil
+	// Execute Request
+	resp, err := client.Do(req)
+	if err != nil {
+		c.logger.Error("Failed to fetch image", "url", imageURL, "error", err)
+		return ctx.JSON(http.StatusBadGateway, map[string]string{"error": "Failed to fetch image"})
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+			"error": "Upstream returned non-200 status", 
+			"code": resp.StatusCode,
+		})
+	}
+
+	// Stream response back
+	contentType := resp.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	
+	// Set caching
+	ctx.Response().Header().Set("Cache-Control", "public, max-age=86400")
+
+	return ctx.Stream(http.StatusOK, contentType, resp.Body)
 }
 
 // HealthCheck checks if the anime API is reachable
