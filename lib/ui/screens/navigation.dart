@@ -25,9 +25,9 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
 
   final List<_NavItemData> _navItems = const [
     _NavItemData(icon: Icons.home_rounded, label: 'Home'),
-    _NavItemData(icon: Icons.lock_clock_rounded, label: 'Schedule'),
-    _NavItemData(icon: Icons.book_rounded, label: 'Manga'),
-    _NavItemData(icon: Icons.settings_rounded, label: 'Settings'),
+    _NavItemData(icon: Icons.explore_rounded, label: 'Explore'),
+    _NavItemData(icon: Icons.bookmarks_rounded, label: 'Library'),
+    _NavItemData(icon: Icons.person_rounded, label: 'Profile'),
   ];
 
   @override

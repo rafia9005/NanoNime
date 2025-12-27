@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nanonime/ui/widgets/proxy_image.dart';
 import '../../data/models/anime.dart';
 import '../../core/theme/colors.dart';
 
@@ -33,8 +34,8 @@ class AnimeCard extends StatelessWidget {
               child: Stack(
                 children: [
                   Positioned.fill(
-                    child: Image.network(
-                      anime.poster,
+                    child: ProxyImage(
+                      imageUrl: anime.poster,
                       fit: BoxFit.cover,
                       errorBuilder: (_, __, ___) => Container(
                         color: Colors.grey.shade900,

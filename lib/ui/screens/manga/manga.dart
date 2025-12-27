@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import 'package:nanonime/data/models/manga.dart';
 import 'package:nanonime/providers/manga_provider.dart';
 import 'package:nanonime/ui/screens/manga/manga_detail.dart';
+import 'package:nanonime/ui/widgets/proxy_image.dart';
 
 class MangaScreen extends StatelessWidget {
   const MangaScreen({Key? key}) : super(key: key);
@@ -79,8 +80,8 @@ class MangaScreen extends StatelessWidget {
                                   child: Stack(
                                     children: [
                                       Positioned.fill(
-                                        child: Image.network(
-                                          manga.thumb,
+                                        child: ProxyImage(
+                                          imageUrl: manga.thumb,
                                           fit: BoxFit.cover,
                                           errorBuilder: (_, __, ___) =>
                                               Container(
