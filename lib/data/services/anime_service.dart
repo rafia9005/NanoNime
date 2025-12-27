@@ -151,4 +151,19 @@ class ApiService {
         .map((item) => Anime.fromJson(Map<String, dynamic>.from(item)))
         .toList();
   }
+
+  /// Fetch list of anime genres
+  Future<List<dynamic>> fetchGenres() async {
+    try {
+      final response = await Fetch.get('/anime/genres');
+      if (response.statusCode == 200) {
+        final body = jsonDecode(response.body);
+        // Assuming structure
+        if (body['data']?['genreList'] is List) {
+          return body['data']['genreList'];
+        }
+      }
+    } catch (_) {}
+    return [];
+  }
 }

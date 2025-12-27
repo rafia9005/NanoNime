@@ -6,6 +6,8 @@ import '../../data/models/anime.dart';
 import '../../core/theme/colors.dart';
 import '../widgets/anime_card.dart';
 import 'package:nanonime/ui/widgets/proxy_image.dart';
+import 'anime/anime_detail.dart';
+import 'manga/manga_detail.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -302,6 +304,28 @@ class _MainScreenState extends State<MainScreen> {
                             return _buildWideFeatureCard(
                               animeData,
                               isManga: isMangaItem,
+                              onTap: () {
+                                if (isMangaItem) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => MangaDetailScreen(
+                                        endpoint: animeData.animeId,
+                                        title: animeData.title,
+                                      ),
+                                    ),
+                                  );
+                                } else {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => AnimeDetailScreen(
+                                        id: animeData.animeId,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
                             );
                           },
                         );
@@ -479,7 +503,32 @@ class _MainScreenState extends State<MainScreen> {
                                   ),
                                   child: SizedBox(
                                     width: 145,
-                                    child: AnimeCard(anime: animeData),
+                                    child: AnimeCard(
+                                      anime: animeData,
+                                      onTap: () {
+                                        if (item is Anime) {
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => AnimeDetailScreen(
+                                                id: animeData.animeId,
+                                              ),
+                                            ),
+                                          );
+                                        } else {
+                                          // Manga logic
+                                          Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                              builder: (_) => MangaDetailScreen(
+                                                endpoint: animeData.animeId,
+                                                title: animeData.title,
+                                              ),
+                                            ),
+                                          );
+                                        }
+                                      },
+                                    ),
                                   ),
                                 ),
 
@@ -589,67 +638,92 @@ class _MainScreenState extends State<MainScreen> {
                           isManga = true;
                         }
 
-                        return AspectRatio(
-                          aspectRatio: 16 / 9,
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(12),
-                            child: Stack(
-                              fit: StackFit.expand,
-                              children: [
-                                ProxyImage(
-                                  imageUrl: animeData.poster,
-                                  fit: BoxFit.cover,
-                                ),
-                                Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.black.withOpacity(0),
-                                        Colors.black.withOpacity(0.9),
-                                      ],
-                                      begin: Alignment.topCenter,
-                                      end: Alignment.bottomCenter,
-                                    ),
+                        return GestureDetector(
+                          onTap: () {
+                            if (isManga) {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => MangaDetailScreen(
+                                    endpoint: animeData.animeId,
+                                    title: animeData.title,
                                   ),
                                 ),
-                                Positioned(
-                                  bottom: 8,
-                                  left: 8,
-                                  right: 8,
-                                  child: Text(
-                                    animeData.title,
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      fontSize: 11,
-                                      fontWeight: FontWeight.w600,
+                              );
+                            } else {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) =>
+                                      AnimeDetailScreen(id: animeData.animeId),
+                                ),
+                              );
+                            }
+                          },
+                          child: AspectRatio(
+                            aspectRatio: 16 / 9,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(12),
+                              child: Stack(
+                                fit: StackFit.expand,
+                                children: [
+                                  ProxyImage(
+                                    imageUrl: animeData.poster,
+                                    fit: BoxFit.cover,
+                                  ),
+                                  Container(
+                                    decoration: BoxDecoration(
+                                      gradient: LinearGradient(
+                                        colors: [
+                                          Colors.black.withOpacity(0),
+                                          Colors.black.withOpacity(0.9),
+                                        ],
+                                        begin: Alignment.topCenter,
+                                        end: Alignment.bottomCenter,
+                                      ),
                                     ),
                                   ),
-                                ),
-                                if (isManga)
                                   Positioned(
-                                    top: 4,
-                                    right: 4,
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 4,
-                                        vertical: 2,
+                                    bottom: 8,
+                                    left: 8,
+                                    right: 8,
+                                    child: Text(
+                                      animeData.title,
+                                      maxLines: 1,
+                                      overflow: TextOverflow.ellipsis,
+                                      style: const TextStyle(
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
                                       ),
-                                      decoration: BoxDecoration(
-                                        color: AppColors.primary,
-                                        borderRadius: BorderRadius.circular(4),
-                                      ),
-                                      child: const Text(
-                                        'Manga',
-                                        style: TextStyle(
-                                          fontSize: 8,
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
+                                    ),
+                                  ),
+                                  if (isManga)
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 4,
+                                          vertical: 2,
+                                        ),
+                                        decoration: BoxDecoration(
+                                          color: AppColors.primary,
+                                          borderRadius: BorderRadius.circular(
+                                            4,
+                                          ),
+                                        ),
+                                        child: const Text(
+                                          'Manga',
+                                          style: TextStyle(
+                                            fontSize: 8,
+                                            fontWeight: FontWeight.bold,
+                                            color: Colors.white,
+                                          ),
                                         ),
                                       ),
                                     ),
-                                  ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -829,133 +903,144 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   // Helper Widget: Wide Feature Card (Text Left, Image Right)
-  Widget _buildWideFeatureCard(Anime anime, {required bool isManga}) {
-    return Container(
-      width: 320, // Wider card
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withOpacity(0.05)),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          Row(
-            children: [
-              Expanded(
-                flex: 6, // More space for text
-                child: Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        anime.title,
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.white,
-                          height: 1.3,
+  Widget _buildWideFeatureCard(
+    Anime anime, {
+    required bool isManga,
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 320, // Wider card
+        decoration: BoxDecoration(
+          color: AppColors.card,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: Colors.white.withOpacity(0.05)),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  flex: 6, // More space for text
+                  child: Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          anime.title,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: const TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                            height: 1.3,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      // Tags/Badges
-                      Wrap(
-                        spacing: 6,
-                        children: [
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(
-                                0.2,
-                              ), // Uniform Purple
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: Text(
-                              isManga ? 'Manga' : 'Anime',
-                              style: TextStyle(
-                                fontSize: 11,
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.bold,
+                        const SizedBox(height: 10),
+                        // Tags/Badges
+                        Wrap(
+                          spacing: 6,
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: AppColors.primary.withOpacity(
+                                  0.2,
+                                ), // Uniform Purple
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: Text(
+                                isManga ? 'Manga' : 'Anime',
+                                style: TextStyle(
+                                  fontSize: 11,
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.bold,
+                                ),
                               ),
                             ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 3,
-                            ),
-                            decoration: BoxDecoration(
-                              color: Colors.white10,
-                              borderRadius: BorderRadius.circular(6),
-                            ),
-                            child: const Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(Icons.star, size: 10, color: Colors.white),
-                                SizedBox(width: 4),
-                                Text(
-                                  '8.5',
-                                  style: TextStyle(
-                                    fontSize: 11,
+                            Container(
+                              padding: const EdgeInsets.symmetric(
+                                horizontal: 8,
+                                vertical: 3,
+                              ),
+                              decoration: BoxDecoration(
+                                color: Colors.white10,
+                                borderRadius: BorderRadius.circular(6),
+                              ),
+                              child: const Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  Icon(
+                                    Icons.star,
+                                    size: 10,
                                     color: Colors.white,
                                   ),
-                                ),
-                              ],
+                                  SizedBox(width: 4),
+                                  Text(
+                                    '8.5',
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.white,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                        const SizedBox(height: 16),
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 16,
+                            vertical: 8,
+                          ),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(100),
+                          ),
+                          child: Text(
+                            isManga ? 'Read Now' : 'Watch Now', // Dynamic Text
+                            style: TextStyle(
+                              fontSize: 12,
+                              color: Colors.black,
+                              fontWeight: FontWeight.w800,
                             ),
                           ),
-                        ],
-                      ),
-                      const SizedBox(height: 16),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+                Expanded(
+                  flex: 4,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      ProxyImage(imageUrl: anime.poster, fit: BoxFit.cover),
                       Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 8,
-                        ),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(100),
-                        ),
-                        child: Text(
-                          isManga ? 'Read Now' : 'Watch Now', // Dynamic Text
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.black,
-                            fontWeight: FontWeight.w800,
+                        decoration: const BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [AppColors.card, Colors.transparent],
+                            begin: Alignment.centerLeft,
+                            end: Alignment.centerRight,
                           ),
                         ),
                       ),
                     ],
                   ),
                 ),
-              ),
-              Expanded(
-                flex: 4,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    ProxyImage(imageUrl: anime.poster, fit: BoxFit.cover),
-                    Container(
-                      decoration: const BoxDecoration(
-                        gradient: LinearGradient(
-                          colors: [AppColors.card, Colors.transparent],
-                          begin: Alignment.centerLeft,
-                          end: Alignment.centerRight,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ],
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }
