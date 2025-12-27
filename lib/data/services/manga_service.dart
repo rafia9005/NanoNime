@@ -17,4 +17,24 @@ class MangaService {
       throw Exception('Failed to fetch manga list: ${response.statusCode}');
     }
   }
+
+  /// Fetches the list of latest manga updates.
+  Future<List<dynamic>> fetchLatestManga({int page = 1}) async {
+    // Assuming the endpoint for latest is /manga/latest/{page} matching the popular one
+    final response = await Fetch.get('/manga/latest/$page');
+    if (response.statusCode == 200) {
+      final data = jsonDecode(response.body);
+      // Depending on the proxy, structure might vary. 
+      // Assuming same structure as popular for now.
+      if (data is Map && data['manga_list'] is List) {
+        return data['manga_list'];
+      } else if (data is List) {
+         return data;
+      } else {
+         return []; // Fail silently or return empty
+      }
+    } else {
+      throw Exception('Failed to fetch latest manga: ${response.statusCode}');
+    }
+  }
 }

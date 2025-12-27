@@ -18,7 +18,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
 
   final List<Widget> _screens = [
     MainScreen(),
-    ScheduleScreen(),
+    ExploreScreen(),
     MangaScreen(),
     SettingsScreen(),
   ];

@@ -4,10 +4,7 @@ import 'package:nanonime/data/services/anime_service.dart';
 import 'package:nanonime/data/services/manga_service.dart';
 import '../../data/models/anime.dart';
 import '../../core/theme/colors.dart';
-import '../../core/router/app_router.dart';
 import '../widgets/anime_card.dart';
-import '../widgets/loading_grid.dart';
-import 'package:nanonime/ui/widgets/ongoing_anime_slider.dart';
 import 'package:nanonime/ui/widgets/proxy_image.dart';
 
 class MainScreen extends StatefulWidget {
@@ -26,21 +23,21 @@ class _MainScreenState extends State<MainScreen> {
   Future<List<Anime>>? _animeListFuture;
   Future<List<dynamic>>? _mangaListFuture;
   Future<List<dynamic>>? _displayDataFuture; // Combined/Filtered data for UI
-  
+
   // Services
   final ApiService _animeService = ApiService();
   final MangaService _mangaService = MangaService();
-  
+
   // Search state
   final TextEditingController _searchController = TextEditingController();
-  bool _isSearching = false;
+  // bool _isSearching = false; // Removed unused field
 
   @override
   void initState() {
     super.initState();
     _refreshData();
   }
-  
+
   void _refreshData() {
     _animeListFuture = _animeService.fetchOngoingAnime();
     _mangaListFuture = _mangaService.fetchMangaList();
@@ -66,7 +63,9 @@ class _MainScreenState extends State<MainScreen> {
     } else {
       // All - Interleave for Balance
       List<dynamic> mixed = [];
-      int len = animeList.length > mangaList.length ? animeList.length : mangaList.length;
+      int len = animeList.length > mangaList.length
+          ? animeList.length
+          : mangaList.length;
       for (int i = 0; i < len; i++) {
         if (i < animeList.length) mixed.add(animeList[i]);
         if (i < mangaList.length) mixed.add(mangaList[i]);
@@ -95,7 +94,7 @@ class _MainScreenState extends State<MainScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                     Row(
+                    Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
@@ -110,29 +109,42 @@ class _MainScreenState extends State<MainScreen> {
                         CircleAvatar(
                           radius: 16,
                           backgroundColor: AppColors.card,
-                          child: Icon(Icons.notifications_none_rounded, color: Colors.white, size: 20),
+                          child: Icon(
+                            Icons.notifications_none_rounded,
+                            color: Colors.white,
+                            size: 20,
+                          ),
                         ),
                       ],
-                     ),
-                     const SizedBox(height: 24),
-                     // Search Bar
-                     Container(
-                       decoration: BoxDecoration(
-                         color: AppColors.card,
-                         borderRadius: BorderRadius.circular(16),
-                       ),
-                       child: TextField(
-                          controller: _searchController,
-                          style: const TextStyle(color: Colors.white),
-                          decoration: InputDecoration(
-                            hintText: 'Search anime or manga...',
-                            hintStyle: TextStyle(color: Colors.grey.shade600, fontSize: 14),
-                            prefixIcon: const Icon(Icons.search, color: Colors.grey),
-                            border: InputBorder.none,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 20),
+                    ),
+                    const SizedBox(height: 24),
+                    // Search Bar
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: TextField(
+                        controller: _searchController,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          hintText: 'Search anime or manga...',
+                          hintStyle: TextStyle(
+                            color: Colors.grey.shade600,
+                            fontSize: 14,
                           ),
-                       ),
-                     ),
+                          prefixIcon: const Icon(
+                            Icons.search,
+                            color: Colors.grey,
+                          ),
+                          border: InputBorder.none,
+                          contentPadding: const EdgeInsets.symmetric(
+                            vertical: 14,
+                            horizontal: 20,
+                          ),
+                        ),
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -141,7 +153,7 @@ class _MainScreenState extends State<MainScreen> {
             // 2. Filter Tabs (Pill Style)
             SliverToBoxAdapter(
               child: Container(
-                height: 50, 
+                height: 50,
                 margin: const EdgeInsets.only(bottom: 24),
                 child: ListView.separated(
                   padding: const EdgeInsets.symmetric(horizontal: 16),
@@ -152,22 +164,31 @@ class _MainScreenState extends State<MainScreen> {
                     final isSelected = _selectedFilterIndex == index;
                     return GestureDetector(
                       onTap: () {
-                          _selectedFilterIndex = index; // Update index
-                          _updateDisplayFuture();       // Re-compute list (no network)
+                        _selectedFilterIndex = index; // Update index
+                        _updateDisplayFuture(); // Re-compute list (no network)
                       },
                       child: AnimatedContainer(
                         duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 0),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 0,
+                        ),
                         alignment: Alignment.center,
                         decoration: BoxDecoration(
-                          color: isSelected ? AppColors.primary : AppColors.card,
+                          color: isSelected
+                              ? AppColors.primary
+                              : AppColors.card,
                           borderRadius: BorderRadius.circular(100),
-                          border: isSelected ? null : Border.all(color: Colors.white12),
+                          border: isSelected
+                              ? null
+                              : Border.all(color: Colors.white12),
                         ),
                         child: Text(
                           _filters[index],
                           style: TextStyle(
-                            color: isSelected ? Colors.white : Colors.grey.shade400,
+                            color: isSelected
+                                ? Colors.white
+                                : Colors.grey.shade400,
                             fontWeight: FontWeight.w600,
                             fontSize: 14,
                           ),
@@ -182,20 +203,36 @@ class _MainScreenState extends State<MainScreen> {
             // 3. Continue Watching (Wide Gradient Card)
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 8,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text('Continue Watching', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                    const Text(
+                      'Continue Watching',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
                     const SizedBox(height: 4),
-                    Text('Pick up where you left off', style: TextStyle(fontSize: 13, color: Colors.grey.shade400)),
+                    Text(
+                      'Pick up where you left off',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
                     const SizedBox(height: 16),
                     _buildGradientContinueCard(),
                   ],
                 ),
               ),
             ),
-            
+
             const SliverToBoxAdapter(child: SizedBox(height: 32)),
 
             // 4. Featured / Fresh Picks (Balanced Mix)
@@ -203,110 +240,82 @@ class _MainScreenState extends State<MainScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                   Padding(
+                  Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Text('Fresh Picks', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
+                        const Text(
+                          'Fresh Picks',
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.white,
+                          ),
+                        ),
                         const SizedBox(height: 4),
-                        Text('Recommended for you today', style: TextStyle(fontSize: 13, color: Colors.grey.shade400)),
+                        Text(
+                          'Recommended for you today',
+                          style: TextStyle(
+                            fontSize: 13,
+                            color: Colors.grey.shade400,
+                          ),
+                        ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 16),
                   SizedBox(
-                    height: 200, 
+                    height: 200,
                     child: FutureBuilder<List<dynamic>>(
                       future: _displayDataFuture, // Use combined data
                       builder: (context, snapshot) {
                         if (!snapshot.hasData) return const SizedBox();
-                        final list = snapshot.data!.take(6).toList(); // Show top 6 mixed items
+                        final list = snapshot.data!
+                            .take(6)
+                            .toList(); // Show top 6 mixed items
                         return ListView.separated(
                           padding: const EdgeInsets.symmetric(horizontal: 16),
                           scrollDirection: Axis.horizontal,
                           itemCount: list.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 16),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 16),
                           itemBuilder: (context, index) {
-                              final item = list[index];
-                              Anime animeData;
-                              bool isMangaItem = false;
-                              
-                              if (item is Anime) {
-                                animeData = item;
-                                isMangaItem = false;
-                              } else {
-                                // Map manga
-                                animeData = Anime(
-                                    title: item['title'] ?? '',
-                                    poster: item['thumb'] ?? '',
-                                    episodes: item['type'] ?? 'Manga',
-                                    animeId: item['endpoint'] ?? '',
-                                    latestReleaseDate: '',
-                                );
-                                isMangaItem = true;
-                              }
-                              return _buildWideFeatureCard(animeData, isManga: isMangaItem);
+                            final item = list[index];
+                            Anime animeData;
+                            bool isMangaItem = false;
+
+                            if (item is Anime) {
+                              animeData = item;
+                              isMangaItem = false;
+                            } else {
+                              // Map manga
+                              animeData = Anime(
+                                title: item['title'] ?? '',
+                                poster: item['thumb'] ?? '',
+                                episodes: item['type'] ?? 'Manga',
+                                animeId: item['endpoint'] ?? '',
+                                latestReleaseDate: '',
+                              );
+                              isMangaItem = true;
+                            }
+                            return _buildWideFeatureCard(
+                              animeData,
+                              isManga: isMangaItem,
+                            );
                           },
                         );
-                      }
+                      },
                     ),
                   ),
                 ],
               ),
             ),
-              
+
             const SliverToBoxAdapter(child: SizedBox(height: 32)),
 
             // 5. Explore Collections
             SliverToBoxAdapter(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                   Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            const Text('Collections', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                            const SizedBox(height: 4),
-                            Text('Explore by genre', style: TextStyle(fontSize: 13, color: Colors.grey.shade400)),
-                          ],
-                        ),
-                        Icon(Icons.category_outlined, color: Colors.grey.shade600, size: 24),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(height: 16),
-                  SizedBox(
-                    height: 60,
-                    child: ListView(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      scrollDirection: Axis.horizontal,
-                      children: [
-                        _buildGenreChip('Action', AppColors.primary, Icons.flash_on),
-                        const SizedBox(width: 12),
-                        _buildGenreChip('Adventure', Colors.white, Icons.map),
-                        const SizedBox(width: 12),
-                        _buildGenreChip('Fantasy', AppColors.primary, Icons.auto_awesome),
-                        const SizedBox(width: 12),
-                        _buildGenreChip('Romance', Colors.white, Icons.favorite),
-                        const SizedBox(width: 12),
-                        _buildGenreChip('Sci-Fi', AppColors.primary, Icons.science),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-
-            const SliverToBoxAdapter(child: SizedBox(height: 32)),
-
-            // 6. Trending Now (Ranked List - Mixed)
-             SliverToBoxAdapter(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -318,13 +327,111 @@ class _MainScreenState extends State<MainScreen> {
                         Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            Text(_selectedFilterIndex == 2 ? 'Trending Manga' : 'Trending Now', 
-                                 style: const TextStyle(fontSize: 20, fontWeight: FontWeight.w900, color: Colors.white)),
+                            const Text(
+                              'Collections',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
                             const SizedBox(height: 4),
-                            Text('Top hits this week', style: TextStyle(fontSize: 13, color: Colors.grey.shade400)),
+                            Text(
+                              'Explore by genre',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
                           ],
                         ),
-                        const Icon(Icons.show_chart_rounded, color: AppColors.primary, size: 24),
+                        Icon(
+                          Icons.category_outlined,
+                          color: Colors.grey.shade600,
+                          size: 24,
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    height: 60,
+                    child: ListView(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      scrollDirection: Axis.horizontal,
+                      children: [
+                        _buildGenreChip(
+                          'Action',
+                          AppColors.primary,
+                          Icons.flash_on,
+                        ),
+                        const SizedBox(width: 12),
+                        _buildGenreChip('Adventure', Colors.white, Icons.map),
+                        const SizedBox(width: 12),
+                        _buildGenreChip(
+                          'Fantasy',
+                          AppColors.primary,
+                          Icons.auto_awesome,
+                        ),
+                        const SizedBox(width: 12),
+                        _buildGenreChip(
+                          'Romance',
+                          Colors.white,
+                          Icons.favorite,
+                        ),
+                        const SizedBox(width: 12),
+                        _buildGenreChip(
+                          'Sci-Fi',
+                          AppColors.primary,
+                          Icons.science,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
+            // 6. Trending Now (Ranked List - Mixed)
+            SliverToBoxAdapter(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              _selectedFilterIndex == 2
+                                  ? 'Trending Manga'
+                                  : 'Trending Now',
+                              style: const TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.w900,
+                                color: Colors.white,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              'Top hits this week',
+                              style: TextStyle(
+                                fontSize: 13,
+                                color: Colors.grey.shade400,
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Icon(
+                          Icons.show_chart_rounded,
+                          color: AppColors.primary,
+                          size: 24,
+                        ),
                       ],
                     ),
                   ),
@@ -334,172 +441,257 @@ class _MainScreenState extends State<MainScreen> {
                     child: FutureBuilder<List<dynamic>>(
                       future: _displayDataFuture, // Combined Future
                       builder: (context, snapshot) {
-                        if (!snapshot.hasData) return const Center(child: CircularProgressIndicator());
+                        if (!snapshot.hasData)
+                          return const Center(
+                            child: CircularProgressIndicator(),
+                          );
                         final list = snapshot.data!.take(10).toList();
                         return ListView.separated(
                           padding: const EdgeInsets.only(left: 16, right: 16),
                           scrollDirection: Axis.horizontal,
                           itemCount: list.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 24),
+                          separatorBuilder: (_, __) =>
+                              const SizedBox(width: 24),
                           itemBuilder: (context, index) {
-                             final item = list[index];
-                             Anime animeData;
-                             if (item is Anime) {
-                                animeData = item;
-                             } else {
-                                animeData = Anime(
-                                    title: item['title'] ?? '',
-                                    poster: item['thumb'] ?? '',
-                                    episodes: item['type'] ?? 'Manga',
-                                    animeId: item['endpoint'] ?? '',
-                                    latestReleaseDate: '',
-                                );
-                             }
-                             
-                             // Ranked Creative Card
-                             return Stack(
-                               clipBehavior: Clip.none,
-                               children: [
-                                 // Card itself
-                                 Padding(
-                                   padding: const EdgeInsets.only(left: 0, right: 0), 
-                                   child: SizedBox(width: 145, child: AnimeCard(anime: animeData)), 
-                                 ),
-                                 
-                                 // Ranking Number Overlay (Right)
-                                 Positioned(
-                                   bottom: -10, 
-                                   right: -5,
-                                   child: Text(
-                                     '${index + 1}',
-                                     style: TextStyle(
-                                       color: Colors.white, 
-                                       fontSize: 85,
-                                       fontWeight: FontWeight.w900,
-                                       fontStyle: FontStyle.italic,
-                                       height: 1,
-                                       shadows: [
-                                         Shadow(offset: Offset(4, 4), color: Colors.black, blurRadius: 0),
-                                          Shadow(offset: Offset(0, 0), color: AppColors.primary.withOpacity(0.5), blurRadius: 20),
-                                       ],
-                                     ),
-                                   ),
-                                 ),
-                               ],
-                             );
+                            final item = list[index];
+                            Anime animeData;
+                            if (item is Anime) {
+                              animeData = item;
+                            } else {
+                              animeData = Anime(
+                                title: item['title'] ?? '',
+                                poster: item['thumb'] ?? '',
+                                episodes: item['type'] ?? 'Manga',
+                                animeId: item['endpoint'] ?? '',
+                                latestReleaseDate: '',
+                              );
+                            }
+
+                            // Ranked Creative Card
+                            return Stack(
+                              clipBehavior: Clip.none,
+                              children: [
+                                // Card itself
+                                Padding(
+                                  padding: const EdgeInsets.only(
+                                    left: 0,
+                                    right: 0,
+                                  ),
+                                  child: SizedBox(
+                                    width: 145,
+                                    child: AnimeCard(anime: animeData),
+                                  ),
+                                ),
+
+                                // Ranking Number Overlay (Right)
+                                Positioned(
+                                  bottom: -10,
+                                  right: -5,
+                                  child: Text(
+                                    '${index + 1}',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 85,
+                                      fontWeight: FontWeight.w900,
+                                      fontStyle: FontStyle.italic,
+                                      height: 1,
+                                      shadows: [
+                                        Shadow(
+                                          offset: Offset(4, 4),
+                                          color: Colors.black,
+                                          blurRadius: 0,
+                                        ),
+                                        Shadow(
+                                          offset: Offset(0, 0),
+                                          color: AppColors.primary.withOpacity(
+                                            0.5,
+                                          ),
+                                          blurRadius: 20,
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
                           },
                         );
-                      }
+                      },
                     ),
                   ),
                 ],
               ),
             ),
 
-             const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
 
             // 7. Latest Updates (Mixed List)
-             SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text('Just Updated', style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white)),
-                      const SizedBox(height: 4),
-                      Text('Latest releases', style: TextStyle(fontSize: 13, color: Colors.grey.shade400)),
-                    ],
-                  ),
+            SliverToBoxAdapter(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Just Updated',
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Latest releases',
+                      style: TextStyle(
+                        fontSize: 13,
+                        color: Colors.grey.shade400,
+                      ),
+                    ),
+                  ],
                 ),
-             ),
-             
-             const SliverToBoxAdapter(child: SizedBox(height: 16)),
-             
-             SliverToBoxAdapter(
-               child: SizedBox(
-                 height: 140, // Smaller cards
-                 child: FutureBuilder<List<dynamic>>(
-                    future: _displayDataFuture, // Combined Future
-                    builder: (context, snapshot) {
-                       if (!snapshot.hasData) return const SizedBox();
-                       final list = snapshot.data!.skip(6).take(20).toList(); // Skip Fresh Picks area (roughly)
-                       return ListView.separated(
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                          scrollDirection: Axis.horizontal,
-                          itemCount: list.length,
-                          separatorBuilder: (_, __) => const SizedBox(width: 12),
-                          itemBuilder: (context, index) {
-                             final item = list[index];
-                             Anime animeData;
-                             bool isManga = false;
-                             if (item is Anime) {
-                               animeData = item;
-                               isManga = false;
-                             } else {
-                               animeData = Anime(
-                                  title: item['title'] ?? '',
-                                  poster: item['thumb'] ?? '',
-                                  episodes: item['type'] ?? 'Manga',
-                                  animeId: item['endpoint'] ?? '',
-                                  latestReleaseDate: '',
-                               );
-                               isManga = true;
-                             }
+              ),
+            ),
 
-                             return AspectRatio(
-                               aspectRatio: 16/9,
-                               child: ClipRRect(
-                                 borderRadius: BorderRadius.circular(12),
-                                 child: Stack(
-                                   fit: StackFit.expand,
-                                   children: [
-                                     ProxyImage(imageUrl: animeData.poster, fit: BoxFit.cover),
-                                     Container(
-                                       decoration: BoxDecoration(gradient: LinearGradient(colors: [Colors.black.withOpacity(0), Colors.black.withOpacity(0.9)], begin: Alignment.topCenter, end: Alignment.bottomCenter)),
-                                     ),
-                                     Positioned(
-                                       bottom: 8, left: 8, right: 8,
-                                       child: Text(animeData.title, maxLines: 1, overflow: TextOverflow.ellipsis, style: const TextStyle(fontSize: 11, fontWeight: FontWeight.w600)),
-                                     ),
-                                     if (isManga)
-                                      Positioned(
-                                       top: 4, right: 4,
-                                       child: Container(
-                                         padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2), 
-                                         decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(4)), 
-                                         child: const Text('Manga', style: TextStyle(fontSize: 8, fontWeight: FontWeight.bold, color: Colors.white))
-                                       ),
-                                     ),
-                                   ],
-                                 ),
-                               ),
-                             );
-                          },
-                       );
-                    }
-                 ),
-               ),
-             ),
-             
-             const SliverToBoxAdapter(child: SizedBox(height: 32)),
+            const SliverToBoxAdapter(child: SizedBox(height: 16)),
 
-             SliverToBoxAdapter(
-               child: Container(
-                 padding: const EdgeInsets.only(top: 40, bottom: 90),
-                 child: Column(
-                   children: [
-                     const Divider(color: Colors.white10, thickness: 1, indent: 80, endIndent: 80),
-                     const SizedBox(height: 24),
-                     Icon(Icons.check_circle_outline_rounded, color: Colors.white24, size: 32),
-                     const SizedBox(height: 8),
-                     Text(
-                       "You've reached the end",
-                       style: TextStyle(color: Colors.white24, fontSize: 12, fontWeight: FontWeight.w500),
-                     ),
-                   ],
-                 ),
-               ),
-             ),
+            SliverToBoxAdapter(
+              child: SizedBox(
+                height: 140, // Smaller cards
+                child: FutureBuilder<List<dynamic>>(
+                  future: _displayDataFuture, // Combined Future
+                  builder: (context, snapshot) {
+                    if (!snapshot.hasData) return const SizedBox();
+                    final list = snapshot.data!
+                        .skip(6)
+                        .take(20)
+                        .toList(); // Skip Fresh Picks area (roughly)
+                    return ListView.separated(
+                      padding: const EdgeInsets.symmetric(horizontal: 16),
+                      scrollDirection: Axis.horizontal,
+                      itemCount: list.length,
+                      separatorBuilder: (_, __) => const SizedBox(width: 12),
+                      itemBuilder: (context, index) {
+                        final item = list[index];
+                        Anime animeData;
+                        bool isManga = false;
+                        if (item is Anime) {
+                          animeData = item;
+                          isManga = false;
+                        } else {
+                          animeData = Anime(
+                            title: item['title'] ?? '',
+                            poster: item['thumb'] ?? '',
+                            episodes: item['type'] ?? 'Manga',
+                            animeId: item['endpoint'] ?? '',
+                            latestReleaseDate: '',
+                          );
+                          isManga = true;
+                        }
+
+                        return AspectRatio(
+                          aspectRatio: 16 / 9,
+                          child: ClipRRect(
+                            borderRadius: BorderRadius.circular(12),
+                            child: Stack(
+                              fit: StackFit.expand,
+                              children: [
+                                ProxyImage(
+                                  imageUrl: animeData.poster,
+                                  fit: BoxFit.cover,
+                                ),
+                                Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.black.withOpacity(0),
+                                        Colors.black.withOpacity(0.9),
+                                      ],
+                                      begin: Alignment.topCenter,
+                                      end: Alignment.bottomCenter,
+                                    ),
+                                  ),
+                                ),
+                                Positioned(
+                                  bottom: 8,
+                                  left: 8,
+                                  right: 8,
+                                  child: Text(
+                                    animeData.title,
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: const TextStyle(
+                                      fontSize: 11,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                if (isManga)
+                                  Positioned(
+                                    top: 4,
+                                    right: 4,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 4,
+                                        vertical: 2,
+                                      ),
+                                      decoration: BoxDecoration(
+                                        color: AppColors.primary,
+                                        borderRadius: BorderRadius.circular(4),
+                                      ),
+                                      child: const Text(
+                                        'Manga',
+                                        style: TextStyle(
+                                          fontSize: 8,
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+            ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 32)),
+
+            SliverToBoxAdapter(
+              child: Container(
+                padding: const EdgeInsets.only(top: 40, bottom: 90),
+                child: Column(
+                  children: [
+                    const Divider(
+                      color: Colors.white10,
+                      thickness: 1,
+                      indent: 80,
+                      endIndent: 80,
+                    ),
+                    const SizedBox(height: 24),
+                    Icon(
+                      Icons.check_circle_outline_rounded,
+                      color: Colors.white24,
+                      size: 32,
+                    ),
+                    const SizedBox(height: 8),
+                    Text(
+                      "You've reached the end",
+                      style: TextStyle(
+                        color: Colors.white24,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
           ],
         ),
       ),
@@ -528,11 +720,12 @@ class _MainScreenState extends State<MainScreen> {
             // 1. Background Image
             Positioned.fill(
               child: ProxyImage(
-                imageUrl: 'https://otakudesu.best/wp-content/uploads/2022/07/One-Piece-Sub-Indo.jpg', 
+                imageUrl:
+                    'https://otakudesu.best/wp-content/uploads/2022/07/One-Piece-Sub-Indo.jpg',
                 fit: BoxFit.cover,
               ),
             ),
-            
+
             // 2. Gradient Overlay (Blended)
             Positioned.fill(
               child: Container(
@@ -540,7 +733,7 @@ class _MainScreenState extends State<MainScreen> {
                   gradient: LinearGradient(
                     colors: [
                       AppColors.primary.withOpacity(0.9), // Strong Purple
-                      Colors.black.withOpacity(0.95),     // Fade to Black
+                      Colors.black.withOpacity(0.95), // Fade to Black
                     ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
@@ -548,7 +741,7 @@ class _MainScreenState extends State<MainScreen> {
                 ),
               ),
             ),
-            
+
             // 3. Content
             Padding(
               padding: const EdgeInsets.all(24),
@@ -557,10 +750,15 @@ class _MainScreenState extends State<MainScreen> {
                   ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Container(
-                      height: 70, width: 70, // Bigger Icon BG
+                      height: 70,
+                      width: 70, // Bigger Icon BG
                       color: Colors.white10,
                       // Placeholder icon
-                      child: const Icon(Icons.play_arrow_rounded, color: Colors.white, size: 42),
+                      child: const Icon(
+                        Icons.play_arrow_rounded,
+                        color: Colors.white,
+                        size: 42,
+                      ),
                     ),
                   ),
                   const SizedBox(width: 20),
@@ -583,29 +781,29 @@ class _MainScreenState extends State<MainScreen> {
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
-                            fontWeight: FontWeight.w500
+                            fontWeight: FontWeight.w500,
                           ),
                         ),
-                         const SizedBox(height: 12),
+                        const SizedBox(height: 12),
                         // Progress Bar Indicator
-                         Container(
-                           height: 4,
-                           width: 100,
-                           decoration: BoxDecoration(
-                             color: Colors.white24,
-                             borderRadius: BorderRadius.circular(10),
-                           ),
-                           child: FractionallySizedBox(
-                             alignment: Alignment.centerLeft,
-                             widthFactor: 0.7,
-                             child: Container(
-                               decoration: BoxDecoration(
-                                 color: Colors.white,
-                                 borderRadius: BorderRadius.circular(10),
-                               ),
-                             ),
-                           ),
-                         ),
+                        Container(
+                          height: 4,
+                          width: 100,
+                          decoration: BoxDecoration(
+                            color: Colors.white24,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: FractionallySizedBox(
+                            alignment: Alignment.centerLeft,
+                            widthFactor: 0.7,
+                            child: Container(
+                              decoration: BoxDecoration(
+                                color: Colors.white,
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                            ),
+                          ),
+                        ),
                       ],
                     ),
                   ),
@@ -615,7 +813,11 @@ class _MainScreenState extends State<MainScreen> {
                       color: Colors.white,
                       shape: BoxShape.circle,
                     ),
-                    child: const Icon(Icons.arrow_forward_rounded, color: AppColors.primary, size: 20),
+                    child: const Icon(
+                      Icons.arrow_forward_rounded,
+                      color: AppColors.primary,
+                      size: 20,
+                    ),
                   ),
                 ],
               ),
@@ -638,7 +840,7 @@ class _MainScreenState extends State<MainScreen> {
       clipBehavior: Clip.antiAlias,
       child: Stack(
         children: [
-           Row(
+          Row(
             children: [
               Expanded(
                 flex: 6, // More space for text
@@ -665,18 +867,30 @@ class _MainScreenState extends State<MainScreen> {
                         spacing: 6,
                         children: [
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
-                              color: AppColors.primary.withOpacity(0.2), // Uniform Purple
+                              color: AppColors.primary.withOpacity(
+                                0.2,
+                              ), // Uniform Purple
                               borderRadius: BorderRadius.circular(6),
                             ),
                             child: Text(
                               isManga ? 'Manga' : 'Anime',
-                              style: TextStyle(fontSize: 11, color: AppColors.primary, fontWeight: FontWeight.bold),
+                              style: TextStyle(
+                                fontSize: 11,
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 3,
+                            ),
                             decoration: BoxDecoration(
                               color: Colors.white10,
                               borderRadius: BorderRadius.circular(6),
@@ -686,7 +900,13 @@ class _MainScreenState extends State<MainScreen> {
                               children: [
                                 Icon(Icons.star, size: 10, color: Colors.white),
                                 SizedBox(width: 4),
-                                Text('8.5', style: TextStyle(fontSize: 11, color: Colors.white)),
+                                Text(
+                                  '8.5',
+                                  style: TextStyle(
+                                    fontSize: 11,
+                                    color: Colors.white,
+                                  ),
+                                ),
                               ],
                             ),
                           ),
@@ -694,14 +914,21 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       const SizedBox(height: 16),
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 8,
+                        ),
                         decoration: BoxDecoration(
                           color: Colors.white,
-                          borderRadius: BorderRadius.circular(100)
+                          borderRadius: BorderRadius.circular(100),
                         ),
                         child: Text(
                           isManga ? 'Read Now' : 'Watch Now', // Dynamic Text
-                          style: TextStyle(fontSize: 12, color: Colors.black, fontWeight: FontWeight.w800),
+                          style: TextStyle(
+                            fontSize: 12,
+                            color: Colors.black,
+                            fontWeight: FontWeight.w800,
+                          ),
                         ),
                       ),
                     ],
@@ -713,16 +940,13 @@ class _MainScreenState extends State<MainScreen> {
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
-                    ProxyImage(
-                      imageUrl: anime.poster,
-                      fit: BoxFit.cover,
-                    ),
+                    ProxyImage(imageUrl: anime.poster, fit: BoxFit.cover),
                     Container(
                       decoration: const BoxDecoration(
                         gradient: LinearGradient(
-                           colors: [AppColors.card, Colors.transparent],
-                           begin: Alignment.centerLeft,
-                           end: Alignment.centerRight,
+                          colors: [AppColors.card, Colors.transparent],
+                          begin: Alignment.centerLeft,
+                          end: Alignment.centerRight,
                         ),
                       ),
                     ),
