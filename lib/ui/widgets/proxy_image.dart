@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// A widget that transparently displays a NetworkImage while proxying the URL
 /// if running on Web to avoid CORS issues.
@@ -22,7 +23,7 @@ class ProxyImage extends StatelessWidget {
   static ImageProvider provider(String url) {
     if (kIsWeb && url.isNotEmpty) {
       // Using local Go backend proxy to bypass WAF/CORS issues securely.
-      const baseUrl = 'http://localhost:7777/api/v1/manga/image'; 
+      final baseUrl = '${dotenv.env['API_URL'] ?? 'http://localhost:8080'}/api/v1/manga/image'; 
       return NetworkImage('$baseUrl?url=${Uri.encodeComponent(url)}');
     }
     return NetworkImage(url);
