@@ -8,7 +8,7 @@ import (
 	"nanonime/modules/users/domain/service"
 	"nanonime/modules/users/handler"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"gorm.io/gorm"
 )
 

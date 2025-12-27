@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	_ "nanonime/docs"
 	"nanonime/internal/app"
 	"nanonime/internal/pkg/config"
 	"nanonime/internal/pkg/logger"

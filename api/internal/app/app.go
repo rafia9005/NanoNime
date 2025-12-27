@@ -10,8 +10,9 @@ import (
 	_validator "nanonime/internal/pkg/validator"
 	"time"
 
-	"github.com/labstack/echo"
-	"github.com/labstack/echo/middleware"
+	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
+	echoSwagger "github.com/swaggo/echo-swagger"
 	"gorm.io/gorm"
 )
 
@@ -73,6 +74,9 @@ func (a *App) Initialize() error {
 		AllowOrigins: []string{"*"},
 		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.HEAD},
 	}))
+
+	// Serve Swagger docs at /swagger/index.html
+	a.r.GET("/swagger/*", echoSwagger.WrapHandler)
 
 	// validate request
 	a.r.Validator = _validator.NewCustomValidator()

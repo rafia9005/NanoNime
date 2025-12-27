@@ -9,11 +9,14 @@ class AuthRepository {
       body: jsonEncode({'identity': identity, 'password': password}),
       headers: {'Content-Type': 'application/json'},
     );
+    final body = jsonDecode(response.body);
     if (response.statusCode == 200) {
       // backend: { data: { token, user }, message, ... }
-      return AuthResponse.fromJson(jsonDecode(response.body)['data']);
+      return AuthResponse.fromJson(body['data']);
     } else {
-      throw Exception(jsonDecode(response.body)['message'] ?? 'Login failed');
+      // Tampilkan error dari field 'error' jika ada, jika tidak pakai 'message'
+      final errorMsg = body['error'] ?? body['message'] ?? 'Login failed';
+      throw errorMsg;
     }
   }
 
@@ -43,9 +46,9 @@ class AuthRepository {
       headers: {'Content-Type': 'application/json'},
     );
     if (response.statusCode != 200) {
-      throw Exception(
-        jsonDecode(response.body)['message'] ?? 'Register failed',
-      );
+      final body = jsonDecode(response.body);
+      final errorMsg = body['error'] ?? body['message'] ?? 'Register failed';
+      throw errorMsg;
     }
   }
 }

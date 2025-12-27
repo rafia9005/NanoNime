@@ -12,3 +12,6 @@ start:
 
 test:
 	go test -v ./...
+
+swag:
+	swag init --parseDependency --parseInternal

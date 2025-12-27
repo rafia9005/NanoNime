@@ -10,7 +10,7 @@ import (
 	"nanonime/internal/pkg/config"
 	"nanonime/internal/pkg/logger"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 type Controller struct {

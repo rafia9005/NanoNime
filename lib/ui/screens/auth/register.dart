@@ -78,9 +78,38 @@ class _AuthRegisterScreenState extends State<AuthRegisterScreen> {
               if (error != null)
                 Padding(
                   padding: const EdgeInsets.only(bottom: 12),
-                  child: Text(
-                    error!,
-                    style: const TextStyle(color: Colors.red),
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.08),
+                      border: Border.all(color: Colors.red.withOpacity(0.5)),
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 12,
+                      vertical: 10,
+                    ),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Icon(
+                          Icons.error_outline,
+                          color: Colors.red,
+                          size: 22,
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: Text(
+                            error!,
+                            style: const TextStyle(
+                              color: Colors.red,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 14,
+                              height: 1.3,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 

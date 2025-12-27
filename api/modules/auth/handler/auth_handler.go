@@ -12,7 +12,7 @@ import (
 	"nanonime/modules/users/dto/response"
 	"net/http"
 
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 )
 
 // AuthHandler struct handles HTTP request for auth.
@@ -40,7 +40,18 @@ func (h *AuthHandler) Handle(event bus.Event) {
 	fmt.Printf("User created: %v", event.Payload)
 }
 
-// Register handles user registration.
+// Register godoc
+// @Summary      Register a new user
+// @Description  Register a new user account
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        payload body request.RegisterRequest true "Register payload"
+// @Success      200 {object} utils.Response
+// @Failure      400 {object} utils.Response
+// @Failure      409 {object} utils.Response
+// @Failure      500 {object} utils.Response
+// @Router       /auth/register [post]
 func (h *AuthHandler) Register(c echo.Context) error {
 	h.log.Info("Handling register request")
 
@@ -78,7 +89,18 @@ func (h *AuthHandler) Register(c echo.Context) error {
 	}, "User registered successfully")
 }
 
-// Login handles user login.
+// Login godoc
+// @Summary      Login user
+// @Description  Authenticate user and return JWT token
+// @Tags         Auth
+// @Accept       json
+// @Produce      json
+// @Param        payload body request.LoginRequest true "Login payload"
+// @Success      200 {object} utils.Response
+// @Failure      400 {object} utils.Response
+// @Failure      401 {object} utils.Response
+// @Failure      500 {object} utils.Response
+// @Router       /auth/login [post]
 func (h *AuthHandler) Login(c echo.Context) error {
 	h.log.Info("Handling login request")
 
