@@ -30,13 +30,8 @@ class _ScheduleScreenState extends State<ScheduleScreen> {
         elevation: 0,
         title: const Text(
           'Anime Schedule',
-          style: TextStyle(
-            color: AppColors.primary,
-            fontWeight: FontWeight.bold,
-            fontSize: 20,
-          ),
+          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 17),
         ),
-        centerTitle: true,
       ),
       body: FutureBuilder<List<AnimeScheduleDay>>(
         future: _scheduleFuture,

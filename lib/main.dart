@@ -1,19 +1,42 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:nanonime/providers/auth_provider.dart';
 import 'package:nanonime/ui/screens/splash.dart';
 import 'package:nanonime/core/theme/colors.dart';
 import 'package:provider/provider.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+
+/// Helper for transparent navigation gesture background
+void pushTransparentRoute(BuildContext context, Widget page) {
+  Navigator.of(context).push(
+    PageRouteBuilder(
+      opaque: false,
+      barrierColor: Colors.transparent,
+      pageBuilder: (_, __, ___) => page,
+      transitionsBuilder: (context, animation, secondaryAnimation, child) {
+        return FadeTransition(opacity: animation, child: child);
+      },
+    ),
+  );
+}
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  final perfs = await SharedPreferences.getInstance();
-  final token = perfs.getString('token');
-  print(token);
   await dotenv.load(fileName: ".env");
+
+  // Set edgeToEdge mode for transparent navigation and status bar (better gesture UX)
+  SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+  SystemChrome.setSystemUIOverlayStyle(
+    SystemUiOverlayStyle(
+      systemNavigationBarColor: Colors.transparent,
+      statusBarColor: Colors.transparent,
+      systemNavigationBarIconBrightness: Brightness.light,
+      statusBarIconBrightness: Brightness.light,
+    ),
+  );
+
   runApp(
     ChangeNotifierProvider(
       create: (_) => AuthProvider(),
@@ -51,7 +74,11 @@ class Runner extends StatelessWidget {
           ),
         ),
       ),
-      home: const SplashScreen(),
+      home: Scaffold(
+        extendBody: true,
+        backgroundColor: Colors.transparent,
+        body: const SplashScreen(),
+      ),
     );
   }
 }
