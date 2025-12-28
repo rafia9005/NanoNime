@@ -3,6 +3,7 @@ import 'package:nanonime/ui/screens/manga/manga_read.dart';
 import 'package:nanonime/utils/fetch.dart';
 import 'package:nanonime/core/theme/colors.dart';
 import 'package:nanonime/ui/widgets/proxy_image.dart';
+import 'package:nanonime/ui/widgets/bouncing_button.dart';
 import 'manga_chapters_list.dart';
 import 'dart:convert';
 
@@ -209,7 +210,7 @@ class _MangaDetailScreenState extends State<MangaDetailScreen> {
                   Positioned(
                     right: 20,
                     bottom: 100,
-                    child: GestureDetector(
+                    child: BouncingButton(
                       onTap: () {
                         // Read first chapter
                         if (chapters.isNotEmpty) {
@@ -348,7 +349,7 @@ class _MangaDetailScreenState extends State<MangaDetailScreen> {
                       borderRadius: BorderRadius.circular(12),
                       border: Border.all(color: Colors.white.withOpacity(0.05)),
                     ),
-                    child: InkWell(
+                    child: BouncingButton(
                       onTap: () {
                         Navigator.push(
                           context,
@@ -360,7 +361,7 @@ class _MangaDetailScreenState extends State<MangaDetailScreen> {
                           ),
                         );
                       },
-                      borderRadius: BorderRadius.circular(12),
+
                       child: Padding(
                         padding: const EdgeInsets.symmetric(
                           horizontal: 16,
@@ -412,8 +413,8 @@ class _MangaDetailScreenState extends State<MangaDetailScreen> {
                 padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                 child: SizedBox(
                   width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: () {
+                  child: BouncingButton(
+                    onTap: () {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
@@ -424,25 +425,31 @@ class _MangaDetailScreenState extends State<MangaDetailScreen> {
                         ),
                       );
                     },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.card,
-                      foregroundColor: Colors.white,
+                    child: Container(
+                      width: double.infinity,
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
+                      decoration: BoxDecoration(
+                        color: AppColors.card,
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      elevation: 0,
+                      alignment: Alignment.center,
+                      child: const Text(
+                        'LIHAT SEMUA CHAPTER',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
                     ),
-                    child: const Text('LIHAT SEMUA CHAPTER'),
+                  ),
+
                   ),
                 ),
               ),
-            ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
-        ],
-      ),
-    );
+      ],
+    ));
   }
 
   Widget _buildStatCard(

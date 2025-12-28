@@ -6,6 +6,7 @@ import '../../data/models/anime.dart';
 import '../../core/theme/colors.dart';
 import '../widgets/anime_card.dart';
 import 'package:nanonime/ui/widgets/proxy_image.dart';
+import 'package:nanonime/ui/widgets/bouncing_button.dart';
 import 'anime/anime_detail.dart';
 import 'manga/manga_detail.dart';
 
@@ -53,8 +54,20 @@ class _MainScreenState extends State<MainScreen> {
   }
 
   Future<List<dynamic>> _computeCombinedData() async {
-    final animeList = (await _animeListFuture) ?? [];
-    final mangaList = (await _mangaListFuture) ?? [];
+    List<Anime> animeList = [];
+    List<dynamic> mangaList = [];
+
+    try {
+      animeList = (await _animeListFuture) ?? [];
+    } catch (e) {
+      debugPrint("Anime fetch error: $e");
+    }
+
+    try {
+      mangaList = (await _mangaListFuture) ?? [];
+    } catch (e) {
+      debugPrint("Manga fetch error: $e");
+    }
 
     if (_selectedFilterIndex == 1) {
       // Anime Only
@@ -164,7 +177,8 @@ class _MainScreenState extends State<MainScreen> {
                   separatorBuilder: (_, __) => const SizedBox(width: 12),
                   itemBuilder: (context, index) {
                     final isSelected = _selectedFilterIndex == index;
-                    return GestureDetector(
+                    return BouncingButton(
+                      scale: 0.9,
                       onTap: () {
                         _selectedFilterIndex = index; // Update index
                         _updateDisplayFuture(); // Re-compute list (no network)
@@ -638,7 +652,7 @@ class _MainScreenState extends State<MainScreen> {
                           isManga = true;
                         }
 
-                        return GestureDetector(
+                        return BouncingButton(
                           onTap: () {
                             if (isManga) {
                               Navigator.push(
@@ -795,7 +809,7 @@ class _MainScreenState extends State<MainScreen> {
             Positioned.fill(
               child: ProxyImage(
                 imageUrl:
-                    'https://otakudesu.best/wp-content/uploads/2022/07/One-Piece-Sub-Indo.jpg',
+                    'https://otakudesu.best/wp-content/uploads/2025/10/151476.jpg',
                 fit: BoxFit.cover,
               ),
             ),
@@ -842,7 +856,7 @@ class _MainScreenState extends State<MainScreen> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         const Text(
-                          'One Piece',
+                          'Kingdom Season 6',
                           style: TextStyle(
                             color: Colors.white,
                             fontSize: 22, // Bigger Title
@@ -851,7 +865,7 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                         const SizedBox(height: 6),
                         Text(
-                          'Episode 1089',
+                          'Episode 1',
                           style: TextStyle(
                             color: Colors.white70,
                             fontSize: 14,
@@ -908,7 +922,8 @@ class _MainScreenState extends State<MainScreen> {
     required bool isManga,
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
+    return BouncingButton(
+      scale: 0.98,
       onTap: onTap,
       child: Container(
         width: 320, // Wider card

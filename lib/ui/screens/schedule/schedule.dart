@@ -4,6 +4,7 @@ import 'package:nanonime/data/services/anime_service.dart';
 import 'package:nanonime/data/services/manga_service.dart';
 import 'package:nanonime/data/models/anime.dart';
 import 'package:nanonime/ui/widgets/proxy_image.dart';
+import 'package:nanonime/ui/widgets/bouncing_button.dart';
 import '../anime/anime_detail.dart';
 import '../manga/manga_detail.dart';
 
@@ -163,7 +164,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   Widget _buildToggleOption(String label, int index) {
     final isSelected = _selectedMode == index;
-    return GestureDetector(
+    return BouncingButton(
+      scale: 0.95,
       onTap: () => setState(() => _selectedMode = index),
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
@@ -417,7 +419,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
                     separatorBuilder: (_, __) => const SizedBox(width: 8),
                     itemBuilder: (context, index) {
                       final isSelected = _selectedDayIndex == index;
-                      return GestureDetector(
+                      return BouncingButton(
+                        scale: 0.9,
                         onTap: () => setState(() => _selectedDayIndex = index),
                         child: AnimatedContainer(
                           duration: const Duration(milliseconds: 200),
@@ -738,7 +741,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
     required bool isAnime,
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
+    return BouncingButton(
+      scale: 0.98,
       onTap: onTap,
       child: Container(
         margin: const EdgeInsets.only(bottom: 16), // Gap between cards
@@ -927,7 +931,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
     bool isManga = false,
     VoidCallback? onTap,
   }) {
-    return GestureDetector(
+    return BouncingButton(
+      scale: 0.95,
       onTap: onTap,
       child: SizedBox(
         width: 140,

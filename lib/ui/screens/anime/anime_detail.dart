@@ -4,6 +4,7 @@ import '../../../data/models/anime.dart';
 import '../../../data/services/anime_service.dart';
 import '../../../core/router/app_router.dart';
 import 'package:nanonime/ui/widgets/proxy_image.dart';
+import 'package:nanonime/ui/widgets/bouncing_button.dart';
 import 'anime_episodes_list.dart';
 
 class AnimeDetailScreen extends StatefulWidget {
@@ -192,7 +193,7 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
                       Positioned(
                         right: 20,
                         bottom: 100,
-                        child: GestureDetector(
+                        child: BouncingButton(
                           onTap: () {
                             // Auto play first episode logic? Or scoll to list
                             if (anime.episodesList.isNotEmpty) {
@@ -317,11 +318,11 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
                               color: Colors.white.withOpacity(0.05),
                             ),
                           ),
-                          child: InkWell(
+                          child: BouncingButton(
                             onTap: () {
                               _navigateToEpisode(context, ep);
                             },
-                            borderRadius: BorderRadius.circular(12),
+
                             child: Padding(
                               padding: const EdgeInsets.all(12),
                               child: Row(
@@ -406,8 +407,8 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
                     padding: const EdgeInsets.fromLTRB(20, 0, 20, 20),
                     child: SizedBox(
                       width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
+                      child: BouncingButton(
+                        onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -418,16 +419,22 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
                             ),
                           );
                         },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: AppColors.card,
-                          foregroundColor: Colors.white,
+                        child: Container(
+                          width: double.infinity,
                           padding: const EdgeInsets.symmetric(vertical: 16),
-                          shape: RoundedRectangleBorder(
+                          decoration: BoxDecoration(
+                            color: AppColors.card,
                             borderRadius: BorderRadius.circular(12),
                           ),
-                          elevation: 0,
+                          alignment: Alignment.center,
+                          child: const Text(
+                            'LIHAT SEMUA EPISODE',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
                         ),
-                        child: const Text('LIHAT SEMUA EPISODE'),
                       ),
                     ),
                   ),
