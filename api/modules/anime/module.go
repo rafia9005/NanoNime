@@ -49,6 +49,9 @@ func (m *Module) RegisterRoutes(e *echo.Echo, basePath string) {
 
 	// Image proxy
 	animeGroup.GET("/image", m.controller.ImageProxyHandler)
+	
+	// Genres (Mock)
+	animeGroup.GET("/genres", m.controller.GetGenres)
 
 	// Proxy all other requests to otakudesu API
 	// Examples:

@@ -1,6 +1,7 @@
 package anime
 
 import (
+	"io"
 	"net/http"
 	"net/url"
 	"strings"
@@ -117,17 +118,23 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	}
 	defer resp.Body.Close()
 
-	// Do NOT copy headers blindly to avoid duplicate CORS headers
-	// Copy specific safe headers if needed, or rely on content sniffing?
-	// For API proxy, we usually want Content-Type.
+	// Read body fully
+	bodyBytes, err := io.ReadAll(resp.Body)
+	if err != nil {
+		c.logger.Error("Failed to read upstream body", "error", err)
+		return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+			"error":   "Failed to read response from upstream",
+		})
+	}
+
+	// Copy specific safe headers
 	contentType := resp.Header.Get("Content-Type")
 	if contentType == "" {
-		contentType = "application/json" // Default Assumption
+		contentType = "application/json"
 	}
 	
-	// Stream the body with the correct status code and content type.
-	// We deliberately do not copy Allow-Origin etc from upstream.
-	return ctx.Stream(resp.StatusCode, contentType, resp.Body)
+	// Send raw bytes
+	return ctx.Blob(resp.StatusCode, contentType, bodyBytes)
 }
 
 // ImageProxyHandler proxies valid image requests to bypass CORS and Referer checks for Anime
@@ -154,21 +161,32 @@ func (c *Controller) ImageProxyHandler(ctx echo.Context) error {
 	// Use the host of the image as referer, frequently works better for CDNs
 	req.Header.Set("Referer", parsedURL.Scheme + "://" + parsedURL.Host + "/")
 	
-	// Create a new client to ensure we follow redirects (c.client disables them)
+	// Create a new client with custom transport to avoid HTTP/2 issues or compression issues
 	client := &http.Client{
 		Timeout: 15 * time.Second,
+		Transport: &http.Transport{
+			ForceAttemptHTTP2:     false, // Force HTTP/1.1
+			DisableKeepAlives:     true,
+			DisableCompression:    true, // We stream raw bytes, let's not compress/decompress
+			TLSHandshakeTimeout:   10 * time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
+		},
 	}
 
 	// Execute Request
 	resp, err := client.Do(req)
 	if err != nil {
 		c.logger.Error("Failed to fetch image", "url", imageURL, "error", err)
-		return ctx.JSON(http.StatusBadGateway, map[string]string{"error": "Failed to fetch image"})
+		// Return the error message to the client for debugging
+		return ctx.JSON(http.StatusBadGateway, map[string]string{
+			"error": "Failed to fetch image from upstream",
+			"details": err.Error(),
+		})
 	}
 	defer resp.Body.Close()
 
 	if resp.StatusCode != http.StatusOK {
-		return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+		return ctx.JSON(resp.StatusCode, map[string]interface{}{
 			"error": "Upstream returned non-200 status", 
 			"code": resp.StatusCode,
 		})
@@ -213,5 +231,17 @@ func (c *Controller) HealthCheck(ctx echo.Context) error {
 		"status":  "up",
 		"api_url": c.baseURL,
 		"code":    resp.StatusCode,
+	})
+}
+
+// GetGenres returns a mock list of genres since upstream is missing it
+func (c *Controller) GetGenres(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"statusCode": 200,
+		"statusMessage": "OK",
+		"message": "Mock genres",
+		"data": map[string]interface{}{
+			"genreList": []interface{}{},
+		},
 	})
 }
