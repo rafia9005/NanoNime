@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
@@ -82,6 +83,38 @@ class Fetch {
       headers: mergedHeaders,
       encoding: encoding,
     );
+  }
+
+  /// Helper to safely decode JSON from response, handling malloc errors / encoding issues.
+  static dynamic safeDecode(http.Response response) {
+    try {
+      // First try standard decoding
+      return jsonDecode(response.body);
+    } catch (e) {
+      // If that fails, try decoding bytes with malformed allowed
+      try {
+        final String decodedBody = utf8.decode(
+          response.bodyBytes,
+          allowMalformed: true,
+        );
+        return jsonDecode(decodedBody);
+      } catch (e2) {
+        debugPrint('JSON Decode Error: $e2');
+        debugPrint('Status Code: ${response.statusCode}');
+        // decode bytes safely for logging
+        try {
+          String preview = utf8.decode(
+            response.bodyBytes,
+            allowMalformed: true,
+          );
+          if (preview.length > 500) preview = preview.substring(0, 500);
+          debugPrint('Body Preview: $preview');
+        } catch (_) {
+          debugPrint('Body Preview: (Binary/Unreadable)');
+        }
+        throw Exception('Failed to decode response: $e2');
+      }
+    }
   }
 
   /// Helper to always add Authorization Bearer token if available

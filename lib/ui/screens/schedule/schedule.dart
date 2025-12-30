@@ -40,7 +40,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
   final ApiService _animeService = ApiService();
   final MangaService _mangaService = MangaService();
 
-  Future<List<Anime>>? _rankingAnimeFuture;
   Future<List<AnimeScheduleDay>>? _animeScheduleFuture;
   Future<List<dynamic>>? _animeGenresFuture; // New
 
@@ -50,21 +49,37 @@ class _ExploreScreenState extends State<ExploreScreen> {
 
   String _searchQuery = '';
 
+  bool _animeFetched = false;
+  bool _mangaFetched = false;
+
   @override
   void initState() {
     super.initState();
-    _refreshData();
+    _loadCurrentTab();
   }
 
-  void _refreshData() {
+  void _loadCurrentTab() {
+    if (_selectedMode == 0 && !_animeFetched) {
+      _fetchAnimeData();
+    } else if (_selectedMode == 1 && !_mangaFetched) {
+      _fetchMangaData();
+    }
+  }
+
+  void _fetchAnimeData() {
     setState(() {
-      _rankingAnimeFuture = _animeService.fetchOngoingAnimeSlider();
       _animeScheduleFuture = _animeService.fetchSchedule();
       _animeGenresFuture = _animeService.fetchGenres();
+      _animeFetched = true;
+    });
+  }
 
-      _rankingMangaFuture = _mangaService.fetchMangaList(page: 1); // Popular
-      _mangaUpdatesFuture = _mangaService.fetchLatestManga(page: 1); // Latest
+  void _fetchMangaData() {
+    setState(() {
+      _rankingMangaFuture = _mangaService.fetchMangaList(page: 1);
+      _mangaUpdatesFuture = _mangaService.fetchLatestManga(page: 1);
       _mangaGenresFuture = _mangaService.fetchGenres();
+      _mangaFetched = true;
     });
   }
 
@@ -138,6 +153,7 @@ class _ExploreScreenState extends State<ExploreScreen> {
                         setState(() {
                           _selectedMode = index;
                         });
+                        _loadCurrentTab();
                       },
                     ),
                   ],
@@ -248,69 +264,8 @@ class _ExploreScreenState extends State<ExploreScreen> {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Top Trending
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'Top Trending',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
-                    ),
-                  ),
-                  Text(
-                    'See All',
-                    style: TextStyle(
-                      fontSize: 12,
-                      color: AppColors.primary,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ],
-              ),
+              // Top Trending removed as per request (data/image issues)
               const SizedBox(height: 16),
-              SizedBox(
-                height: 240,
-                child: FutureBuilder<List<Anime>>(
-                  future: _rankingAnimeFuture,
-                  builder: (context, snapshot) {
-                    if (snapshot.connectionState == ConnectionState.waiting) {
-                      return const Center(child: CircularProgressIndicator());
-                    }
-                    if (!snapshot.hasData || snapshot.data!.isEmpty) {
-                      return _buildMockRankingList(
-                        isManga: false,
-                      ); // Fallback to mock if empty/error
-                    }
-                    return ListView.separated(
-                      scrollDirection: Axis.horizontal,
-                      clipBehavior: Clip.none,
-                      itemCount: snapshot.data!.length,
-                      separatorBuilder: (_, __) => const SizedBox(width: 16),
-                      itemBuilder: (context, index) {
-                        final anime = snapshot.data![index];
-                        return _buildRankedCard(
-                          index + 1,
-                          anime.title,
-                          anime.episodes.isNotEmpty ? anime.episodes : 'Anime',
-                          anime.poster,
-                          onTap: () => Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) =>
-                                  AnimeDetailScreen(id: anime.animeId),
-                            ),
-                          ),
-                        );
-                      },
-                    );
-                  },
-                ),
-              ),
-
-              const SizedBox(height: 32),
 
               // Genres
               const Text(

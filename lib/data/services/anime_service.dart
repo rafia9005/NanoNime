@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:nanonime/data/models/anime.dart';
 import '../../utils/fetch.dart';
 
@@ -14,7 +12,7 @@ class ApiService {
       );
     }
 
-    final Map<String, dynamic> body = jsonDecode(response.body);
+    final dynamic body = Fetch.safeDecode(response);
     final List<dynamic> list =
         (body['data']?['ongoing']?['animeList']) as List<dynamic>? ?? [];
 
@@ -33,7 +31,7 @@ class ApiService {
       );
     }
 
-    final Map<String, dynamic> body = jsonDecode(response.body);
+    final dynamic body = Fetch.safeDecode(response);
     final List<dynamic> list =
         (body['data']?['animeList']) as List<dynamic>? ?? [];
 
@@ -52,7 +50,7 @@ class ApiService {
       );
     }
 
-    final Map<String, dynamic> body = jsonDecode(response.body);
+    final dynamic body = Fetch.safeDecode(response);
     // Normalize top-level data map
     final Map<String, dynamic> data = Map<String, dynamic>.from(
       body['data'] ?? <String, dynamic>{},
@@ -73,7 +71,7 @@ class ApiService {
     if (res.statusCode != 200) {
       throw Exception('Failed to fetch schedule');
     }
-    final json = jsonDecode(res.body);
+    final json = Fetch.safeDecode(res);
     final list = (json['data']['scheduleList'] as List)
         .map((e) => AnimeScheduleDay.fromJson(e))
         .toList();
@@ -90,7 +88,7 @@ class ApiService {
       );
     }
 
-    final Map<String, dynamic> body = jsonDecode(response.body);
+    final dynamic body = Fetch.safeDecode(response);
     final Map<String, dynamic> data = Map<String, dynamic>.from(
       body['data'] ?? <String, dynamic>{},
     );
@@ -114,7 +112,7 @@ class ApiService {
     }
 
     try {
-      final Map<String, dynamic> body = jsonDecode(response.body);
+      final dynamic body = Fetch.safeDecode(response);
       final dynamic data = body['data'];
       if (data is Map && data['details'] is Map) {
         final details = Map<String, dynamic>.from(data['details']);
@@ -143,7 +141,7 @@ class ApiService {
       );
     }
 
-    final Map<String, dynamic> body = jsonDecode(response.body);
+    final dynamic body = Fetch.safeDecode(response);
     final List<dynamic> list =
         (body['data']?['animeList']) as List<dynamic>? ?? [];
 
@@ -157,7 +155,7 @@ class ApiService {
     try {
       final response = await Fetch.get('/anime/genres');
       if (response.statusCode == 200) {
-        final body = jsonDecode(response.body);
+        final body = Fetch.safeDecode(response);
         // Assuming structure
         if (body['data']?['genreList'] is List) {
           return body['data']['genreList'];

@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart'; // For debugPrint
 import 'package:nanonime/utils/fetch.dart';
 
@@ -9,7 +8,7 @@ class MangaService {
     try {
       final response = await Fetch.get('/manga/popular/$page');
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = Fetch.safeDecode(response);
         if (data is Map && data['manga_list'] is List) {
           return data['manga_list'];
         } else if (data is List) {
@@ -27,13 +26,21 @@ class MangaService {
     try {
       final response = await Fetch.get('/manga/latest/$page');
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        if (data is Map && data['manga_list'] is List) {
-          return data['manga_list'];
+        final data = Fetch.safeDecode(response);
+        if (data is Map) {
+          if (data['manga_list'] is List) return data['manga_list'];
+          if (data['list_up'] is List)
+            return data['list_up']; // Common in some APIs
+          if (data['latest_list'] is List) return data['latest_list'];
+          if (data['data'] is List) return data['data'];
         } else if (data is List) {
           return data;
         }
       }
+
+      // Fallback to popular if latest endpoint is empty/broken
+      debugPrint('Latest manga list empty, falling back to popular list.');
+      return await fetchMangaList(page: page);
     } catch (e) {
       debugPrint('Error fetching latest manga: $e');
     }
@@ -44,7 +51,7 @@ class MangaService {
   Future<Map<String, dynamic>> fetchMangaDetail(String endpoint) async {
     final response = await Fetch.get('/manga/detail/$endpoint');
     if (response.statusCode == 200) {
-      return jsonDecode(response.body);
+      return Fetch.safeDecode(response);
     } else {
       throw Exception('Failed to fetch manga detail');
     }
@@ -54,7 +61,7 @@ class MangaService {
   Future<List<dynamic>> fetchChapter(String endpoint) async {
     final response = await Fetch.get('/manga/chapter/$endpoint');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = Fetch.safeDecode(response);
       // Assuming structure { "image_list": [...] } or similar
       if (data is Map && data['image_list'] is List) {
         return data['image_list'];
@@ -71,7 +78,7 @@ class MangaService {
   Future<List<dynamic>> searchManga(String query) async {
     final response = await Fetch.get('/manga/search/$query');
     if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
+      final data = Fetch.safeDecode(response);
       if (data is Map && data['manga_list'] is List) {
         return data['manga_list'];
       }
@@ -86,7 +93,7 @@ class MangaService {
     try {
       final response = await Fetch.get('/manga/genres');
       if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
+        final data = Fetch.safeDecode(response);
         if (data is Map && data['list_genre'] is List) {
           return data['list_genre'];
         } else if (data is List) {
