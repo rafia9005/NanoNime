@@ -10,6 +10,7 @@ import 'package:nanonime/ui/widgets/bouncing_button.dart';
 import 'anime/anime_detail.dart';
 import 'manga/manga_detail.dart';
 import 'search_delegate.dart';
+import 'package:nanonime/ui/widgets/custom_tab_selector.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -173,56 +174,24 @@ class _MainScreenState extends State<MainScreen> {
               ),
             ),
 
-            // 2. Filter Tabs (Pill Style)
+            // 2. Filter Tabs (Pill Style -> CustomTabSelector)
             SliverToBoxAdapter(
-              child: Container(
-                height: 50,
-                margin: const EdgeInsets.only(bottom: 24),
-                child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  scrollDirection: Axis.horizontal,
-                  itemCount: _filters.length,
-                  separatorBuilder: (_, __) => const SizedBox(width: 12),
-                  itemBuilder: (context, index) {
-                    final isSelected = _selectedFilterIndex == index;
-                    return BouncingButton(
-                      scale: 0.9,
-                      onTap: () {
-                        _selectedFilterIndex = index; // Update index
-                        _updateDisplayFuture(); // Re-compute list (no network)
-                      },
-                      child: AnimatedContainer(
-                        duration: const Duration(milliseconds: 200),
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 28,
-                          vertical: 0,
-                        ),
-                        alignment: Alignment.center,
-                        decoration: BoxDecoration(
-                          color: isSelected
-                              ? AppColors.primary
-                              : AppColors.card,
-                          borderRadius: BorderRadius.circular(100),
-                          border: isSelected
-                              ? null
-                              : Border.all(color: Colors.white12),
-                        ),
-                        child: Text(
-                          _filters[index],
-                          style: TextStyle(
-                            color: isSelected
-                                ? Colors.white
-                                : Colors.grey.shade400,
-                            fontWeight: FontWeight.w600,
-                            fontSize: 14,
-                          ),
-                        ),
-                      ),
-                    );
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                child: CustomTabSelector(
+                  tabs: _filters,
+                  selectedIndex: _selectedFilterIndex,
+                  onTabSelected: (index) {
+                    setState(() {
+                      _selectedFilterIndex = index;
+                      _updateDisplayFuture();
+                    });
                   },
                 ),
               ),
             ),
+
+            const SliverToBoxAdapter(child: SizedBox(height: 24)),
 
             // 3. Continue Watching (Wide Gradient Card)
             SliverToBoxAdapter(
@@ -849,7 +818,7 @@ class _MainScreenState extends State<MainScreen> {
                       height: 70,
                       width: 70, // Bigger Icon BG
                       color: Colors.white10,
-                      // Placeholder icon
+                      // Placeholder for missing bottom nav check
                       child: const Icon(
                         Icons.play_arrow_rounded,
                         color: Colors.white,

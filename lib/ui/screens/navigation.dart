@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:nanonime/ui/screens/manga/manga.dart';
+import 'library/library_screen.dart';
 import 'package:nanonime/ui/screens/schedule/schedule.dart';
 import '../../core/theme/colors.dart';
 import 'main.dart';
@@ -19,7 +19,7 @@ class _NavigationWrapperState extends State<NavigationWrapper> {
   final List<Widget> _screens = [
     MainScreen(),
     ExploreScreen(),
-    MangaScreen(),
+    LibraryScreen(),
     SettingsScreen(),
   ];
 

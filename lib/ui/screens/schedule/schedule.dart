@@ -7,6 +7,7 @@ import 'package:nanonime/ui/widgets/proxy_image.dart';
 import 'package:nanonime/ui/widgets/bouncing_button.dart';
 import '../anime/anime_detail.dart';
 import '../manga/manga_detail.dart';
+import '../../widgets/custom_tab_selector.dart';
 
 class ExploreScreen extends StatefulWidget {
   const ExploreScreen({Key? key}) : super(key: key);
@@ -129,21 +130,15 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       ),
                     ),
                     const SizedBox(height: 16),
-                    // Toggle Switch
-                    Container(
-                      height: 45,
-                      width: double.infinity,
-                      decoration: BoxDecoration(
-                        color: AppColors.card,
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      padding: const EdgeInsets.all(4),
-                      child: Row(
-                        children: [
-                          Expanded(child: _buildToggleOption('Anime', 0)),
-                          Expanded(child: _buildToggleOption('Manga', 1)),
-                        ],
-                      ),
+                    // Toggle Switch -> CustomTabSelector
+                    CustomTabSelector(
+                      tabs: const ['Anime', 'Manga'],
+                      selectedIndex: _selectedMode,
+                      onTabSelected: (index) {
+                        setState(() {
+                          _selectedMode = index;
+                        });
+                      },
                     ),
                   ],
                 ),
@@ -157,29 +152,6 @@ class _ExploreScreenState extends State<ExploreScreen> {
                       ? _buildAnimeSlivers()
                       : _buildMangaSlivers(),
                 ),
-        ),
-      ),
-    );
-  }
-
-  Widget _buildToggleOption(String label, int index) {
-    final isSelected = _selectedMode == index;
-    return BouncingButton(
-      scale: 0.95,
-      onTap: () => setState(() => _selectedMode = index),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 200),
-        alignment: Alignment.center,
-        decoration: BoxDecoration(
-          color: isSelected ? AppColors.primary : Colors.transparent,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          label,
-          style: TextStyle(
-            color: isSelected ? Colors.white : Colors.grey,
-            fontWeight: FontWeight.bold,
-          ),
         ),
       ),
     );
