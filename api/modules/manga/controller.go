@@ -1,7 +1,7 @@
 package manga
 
 import (
-	"io"
+	"encoding/json"
 	"net/http"
 	"net/url"
 	"strings"
@@ -86,24 +86,19 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 		})
 	}
 
-	// Copy headers
-	for key, values := range ctx.Request().Header {
-		for _, value := range values {
-			proxyReq.Header.Add(key, value)
-		}
+	// Copy headers (ONLY Authorization and Content-Type to be safe)
+	if auth := ctx.Request().Header.Get("Authorization"); auth != "" {
+		proxyReq.Header.Set("Authorization", auth)
 	}
-
-	// Set/Override specific headers
-	proxyReq.Header.Set("X-Forwarded-For", ctx.RealIP())
-	proxyReq.Header.Set("X-Forwarded-Proto", ctx.Scheme())
-	proxyReq.Header.Set("X-Forwarded-Host", ctx.Request().Host)
+	if ct := ctx.Request().Header.Get("Content-Type"); ct != "" {
+		proxyReq.Header.Set("Content-Type", ct)
+	}
 
 	// Log request
 	c.logger.Info("Proxying request",
 		"method", ctx.Request().Method,
 		"from", requestPath,
 		"to", targetURL.String(),
-		"ip", ctx.RealIP(),
 	)
 
 	// Execute request
@@ -117,29 +112,28 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	}
 	defer resp.Body.Close()
 
-	// Copy response headers
-	for key, values := range resp.Header {
-		for _, value := range values {
-			ctx.Response().Header().Add(key, value)
+	// THIS IS THE FIX:
+	// We do NOT copy headers from the upstream response.
+	// We decode the body (assuming JSON) and send it back cleanly.
+	// The middleware in app.go will attach the correct CORS headers.
+
+	var result interface{}
+	// Check if content type is JSON
+	contentType := resp.Header.Get("Content-Type")
+	if strings.Contains(contentType, "application/json") {
+		if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+			c.logger.Error("Failed to decode upstream JSON", "error", err)
+			return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+				"error": "Invalid JSON from upstream",
+			})
 		}
+		return ctx.JSON(resp.StatusCode, result)
 	}
 
-	// Set status code
-	ctx.Response().WriteHeader(resp.StatusCode)
-
-	// Copy response body
-	_, err = io.Copy(ctx.Response().Writer, resp.Body)
-	if err != nil {
-		c.logger.Error("Failed to copy response body", "error", err)
-		return err
-	}
-
-	c.logger.Info("Proxy response",
-		"status", resp.StatusCode,
-		"url", targetURL.String(),
-	)
-
-	return nil
+	// Fallback for non-JSON (like images or raw text), use Stream but be careful with headers
+	// For now, let's assume API always returns JSON. If not, we might need a specific handler.
+	// But to be safe, if not JSON, we copy simple body WITHOUT headers.
+	return ctx.Stream(resp.StatusCode, contentType, resp.Body)
 }
 
 // HealthCheck checks if the manga API is reachable
@@ -170,4 +164,54 @@ func (c *Controller) HealthCheck(ctx echo.Context) error {
 		"api_url": c.baseURL,
 		"code":    resp.StatusCode,
 	})
+}
+
+// ImageProxyHandler proxies valid image requests to bypass CORS and Referer checks
+func (c *Controller) ImageProxyHandler(ctx echo.Context) error {
+	imageURL := ctx.QueryParam("url")
+	if imageURL == "" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Missing url parameter"})
+	}
+
+	// Validate URL
+	parsedURL, err := url.Parse(imageURL)
+	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid URL"})
+	}
+
+	req, err := http.NewRequest("GET", imageURL, nil)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create request"})
+	}
+
+	// Set headers to look like a browser
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
+	
+	// Execute Request
+	resp, err := c.client.Do(req)
+	if err != nil {
+		c.logger.Error("Failed to fetch image", "url", imageURL, "error", err)
+		return ctx.JSON(http.StatusBadGateway, map[string]string{"error": "Failed to fetch image"})
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		// Log but try to return what we got if it's an image? No, safer to error.
+		return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+			"error": "Upstream returned non-200 status", 
+			"code": resp.StatusCode,
+		})
+	}
+
+	// Stream response back
+	contentType := resp.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	
+	// Set caching for better performance
+	ctx.Response().Header().Set("Cache-Control", "public, max-age=86400")
+
+	return ctx.Stream(http.StatusOK, contentType, resp.Body)
 }

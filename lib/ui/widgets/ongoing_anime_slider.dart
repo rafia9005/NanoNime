@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:nanonime/ui/widgets/proxy_image.dart';
 import 'package:nanonime/data/services/anime_service.dart';
 import '../../data/models/anime.dart';
 import '../../core/router/app_router.dart';
@@ -84,7 +85,7 @@ class _OngoingAnimeSliderState extends State<OngoingAnimeSlider> {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(12),
             image: DecorationImage(
-              image: NetworkImage(anime.poster),
+              image: ProxyImage.provider(anime.poster),
               fit: BoxFit.cover,
             ),
           ),

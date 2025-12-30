@@ -72,7 +72,7 @@ func (a *App) Initialize() error {
 	a.r.Use(middleware.Recover())
 	a.r.Use(middleware.CORSWithConfig(middleware.CORSConfig{
 		AllowOrigins: []string{"*"},
-		AllowMethods: []string{echo.GET, echo.POST, echo.PUT, echo.DELETE, echo.PATCH, echo.HEAD},
+		AllowMethods: []string{echo.GET, echo.HEAD, echo.PUT, echo.PATCH, echo.POST, echo.DELETE},
 	}))
 
 	// Serve Swagger docs at /swagger/index.html

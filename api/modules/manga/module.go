@@ -44,6 +44,9 @@ func (m *Module) RegisterRoutes(e *echo.Echo, basePath string) {
 	// Create manga group: /api/v1/manga
 	mangaGroup := e.Group(basePath + "/manga")
 
+	// Image Proxy endpoint to bypass CORS/Blocked images
+	mangaGroup.GET("/image", m.controller.ImageProxyHandler)
+
 	// Health check endpoint
 	mangaGroup.GET("/health", m.controller.HealthCheck)
 
