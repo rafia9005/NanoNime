@@ -9,6 +9,7 @@ import 'package:nanonime/ui/widgets/proxy_image.dart';
 import 'package:nanonime/ui/widgets/bouncing_button.dart';
 import 'anime/anime_detail.dart';
 import 'manga/manga_detail.dart';
+import 'search_delegate.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -141,6 +142,13 @@ class _MainScreenState extends State<MainScreen> {
                       ),
                       child: TextField(
                         controller: _searchController,
+                        readOnly: true,
+                        onTap: () {
+                          showSearch(
+                            context: context,
+                            delegate: AppSearchDelegate(),
+                          );
+                        },
                         style: const TextStyle(color: Colors.white),
                         decoration: InputDecoration(
                           hintText: 'Search anime or manga...',

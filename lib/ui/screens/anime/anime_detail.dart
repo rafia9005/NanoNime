@@ -116,114 +116,86 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
                         ),
                       ),
 
-                      // Content Overlay
+                      // Floating Action Buttons (Favorite + Play)
                       Positioned(
-                        left: 20,
                         right: 20,
-                        bottom: 30,
+                        bottom: 80,
                         child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            // Title
-                            Text(
-                              anime.title.toUpperCase(),
-                              style: const TextStyle(
-                                fontSize: 28,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                                letterSpacing: 0.5,
-                                height: 1.1,
+                            // Favorite Button
+                            BouncingButton(
+                              onTap: () {
+                                // TODO: Add to favorites logic
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(
+                                    content: Text('Added to Favorites (Demo)'),
+                                    duration: Duration(seconds: 1),
+                                  ),
+                                );
+                              },
+                              child: Container(
+                                width: 50,
+                                height: 50,
+                                decoration: BoxDecoration(
+                                  color: Colors.white.withOpacity(0.2),
+                                  shape: BoxShape.circle,
+                                  border: Border.all(
+                                    color: Colors.white.withOpacity(0.2),
+                                  ),
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: Colors.black.withOpacity(0.2),
+                                      blurRadius: 10,
+                                      offset: const Offset(0, 4),
+                                    ),
+                                  ],
+                                ),
+                                child: const Icon(
+                                  Icons.favorite_border_rounded,
+                                  color: Colors.white,
+                                  size: 24,
+                                ),
                               ),
                             ),
-                            const SizedBox(height: 8),
-
-                            // Metadata Line
-                            Row(
-                              children: [
-                                Text(
-                                  '${anime.aired.split(' ').lastOrNull ?? '202X'}',
-                                  style: const TextStyle(
-                                    color: Colors.white70,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                ),
-                                const SizedBox(width: 8),
-                                const Text(
-                                  '|',
-                                  style: TextStyle(color: Colors.white30),
-                                ),
-                                const SizedBox(width: 8),
-                                Expanded(
-                                  child: Text(
-                                    anime.genres
-                                        .take(3)
-                                        .map((e) => e.title)
-                                        .join(', ')
-                                        .toLowerCase(),
-                                    maxLines: 1,
-                                    overflow: TextOverflow.ellipsis,
-                                    style: const TextStyle(
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w500,
+                            const SizedBox(height: 16),
+                            // Play Button (EP 1)
+                            BouncingButton(
+                              onTap: () {
+                                if (anime.episodesList.isNotEmpty) {
+                                  // Assuming list is descending (Newest first), so Play Last = Ep 1
+                                  final firstEp = anime.episodesList.last;
+                                  _navigateToEpisode(context, firstEp);
+                                } else {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text('No episodes available'),
                                     ),
-                                  ),
+                                  );
+                                }
+                              },
+                              child: Container(
+                                width: 65,
+                                height: 65,
+                                decoration: BoxDecoration(
+                                  color: AppColors.primary,
+                                  shape: BoxShape.circle,
+                                  boxShadow: [
+                                    BoxShadow(
+                                      color: AppColors.primary.withOpacity(0.4),
+                                      blurRadius: 15,
+                                      offset: const Offset(0, 5),
+                                    ),
+                                  ],
                                 ),
-                                const SizedBox(width: 8),
-                                const Icon(
-                                  Icons.star_rounded,
-                                  color: Colors.amber,
-                                  size: 16,
+                                child: const Icon(
+                                  Icons.play_arrow_rounded,
+                                  color: Colors.white,
+                                  size: 32,
                                 ),
-                                const SizedBox(width: 4),
-                                const Text(
-                                  '4.9',
-                                  style: TextStyle(
-                                    color: Colors.white,
-                                    fontWeight: FontWeight.bold,
-                                  ),
-                                ),
-                              ],
+                              ),
                             ),
                           ],
-                        ),
-                      ),
-
-                      // Floating Play Button (Right Side, slightly elevated)
-                      Positioned(
-                        right: 20,
-                        bottom: 100,
-                        child: BouncingButton(
-                          onTap: () {
-                            // Auto play first episode logic? Or scoll to list
-                            if (anime.episodesList.isNotEmpty) {
-                              // Assuming first in list is latest or first? Usually API returns Descending sometimes.
-                              // Let's scroll or just do nothing (user clicks list below)
-                              // Or navigation to first item
-                              // final firstEp = anime.episodesList.first;
-                              // ... logic
-                            }
-                          },
-                          child: Container(
-                            width: 60,
-                            height: 60,
-                            decoration: BoxDecoration(
-                              color: AppColors.primary,
-                              shape: BoxShape.circle,
-                              boxShadow: [
-                                BoxShadow(
-                                  color: AppColors.primary.withOpacity(0.4),
-                                  blurRadius: 15,
-                                  offset: const Offset(0, 5),
-                                ),
-                              ],
-                            ),
-                            child: const Icon(
-                              Icons.play_arrow_rounded,
-                              color: Colors.white,
-                              size: 36,
-                            ),
-                          ),
                         ),
                       ),
                     ],
@@ -238,6 +210,67 @@ class _AnimeDetailScreenState extends State<AnimeDetailScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
+                      const SizedBox(height: 24),
+                      // Title
+                      Text(
+                        anime.title,
+                        style: const TextStyle(
+                          fontSize: 26,
+                          fontWeight: FontWeight.w900,
+                          color: Colors.white,
+                          height: 1.2,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Metadata Line
+                      Row(
+                        children: [
+                          Text(
+                            '${anime.aired.split(' ').lastOrNull ?? '202X'}',
+                            style: const TextStyle(
+                              color: Colors.white70,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Text(
+                            '|',
+                            style: TextStyle(color: Colors.white30),
+                          ),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              anime.genres
+                                  .take(3)
+                                  .map((e) => e.title)
+                                  .join(', ')
+                                  .toLowerCase(),
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white70,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          const Icon(
+                            Icons.star_rounded,
+                            color: Colors.amber,
+                            size: 16,
+                          ),
+                          const SizedBox(width: 4),
+                          const Text(
+                            '4.9',
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 24),
                       // Stats Row
                       Row(
                         children: [

@@ -206,50 +206,87 @@ class _MangaDetailScreenState extends State<MangaDetailScreen> {
                     ),
                   ),
 
-                  // Floating Read Button
+                  // Floating Action Buttons (Favorite + Read)
                   Positioned(
                     right: 20,
-                    bottom: 100,
-                    child: BouncingButton(
-                      onTap: () {
-                        // Read first chapter
-                        if (chapters.isNotEmpty) {
-                          // Often chapter list is descending, so navigate to last item?
-                          // Or just navigate to the top item (latest)?
-                          // For "Read Now" usually means continue or start.
-                          // Let's just go to the latest (first in list) for now as default action.
-                          final ch = chapters.first;
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (_) => MangaReadScreen(
-                                chapterEndpoint: ch['chapter_endpoint'],
-                                title: displayTitle,
+                    bottom: 80,
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        // Favorite Button
+                        BouncingButton(
+                          onTap: () {
+                            // TODO: Add to favorites logic
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                content: Text('Added to Favorites (Demo)'),
+                                duration: Duration(seconds: 1),
                               ),
+                            );
+                          },
+                          child: Container(
+                            width: 50,
+                            height: 50,
+                            decoration: BoxDecoration(
+                              color: Colors.white.withOpacity(0.2),
+                              shape: BoxShape.circle,
+                              border: Border.all(
+                                color: Colors.white.withOpacity(0.2),
+                              ),
+                              boxShadow: [
+                                BoxShadow(
+                                  color: Colors.black.withOpacity(0.2),
+                                  blurRadius: 10,
+                                  offset: const Offset(0, 4),
+                                ),
+                              ],
                             ),
-                          );
-                        }
-                      },
-                      child: Container(
-                        width: 60,
-                        height: 60,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppColors.primary.withOpacity(0.4),
-                              blurRadius: 15,
-                              offset: const Offset(0, 5),
+                            child: const Icon(
+                              Icons.favorite_border_rounded,
+                              color: Colors.white,
+                              size: 24,
                             ),
-                          ],
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.menu_book_rounded,
-                          color: Colors.white,
-                          size: 30,
+                        const SizedBox(height: 16),
+                        // Read Button
+                        BouncingButton(
+                          onTap: () {
+                            if (chapters.isNotEmpty) {
+                              final ch = chapters.first;
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (_) => MangaReadScreen(
+                                    chapterEndpoint: ch['chapter_endpoint'],
+                                    title: displayTitle,
+                                  ),
+                                ),
+                              );
+                            }
+                          },
+                          child: Container(
+                            width: 65,
+                            height: 65,
+                            decoration: BoxDecoration(
+                              color: AppColors.primary,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppColors.primary.withOpacity(0.4),
+                                  blurRadius: 15,
+                                  offset: const Offset(0, 5),
+                                ),
+                              ],
+                            ),
+                            child: const Icon(
+                              Icons.menu_book_rounded,
+                              color: Colors.white,
+                              size: 32,
+                            ),
+                          ),
                         ),
-                      ),
+                      ],
                     ),
                   ),
                 ],
@@ -442,14 +479,14 @@ class _MangaDetailScreenState extends State<MangaDetailScreen> {
                       ),
                     ),
                   ),
-
-                  ),
                 ),
               ),
+            ),
 
           const SliverToBoxAdapter(child: SizedBox(height: 40)),
-      ],
-    ));
+        ],
+      ),
+    );
   }
 
   Widget _buildStatCard(
