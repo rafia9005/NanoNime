@@ -118,29 +118,90 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	}
 	defer resp.Body.Close()
 
-	// Copy response headers
-	for key, values := range resp.Header {
-		for _, value := range values {
-			ctx.Response().Header().Add(key, value)
-		}
-	}
-
-	// Set status code
-	ctx.Response().WriteHeader(resp.StatusCode)
-
-	// Copy response body
-	_, err = io.Copy(ctx.Response().Writer, resp.Body)
+	// Read body fully
+	bodyBytes, err := io.ReadAll(resp.Body)
 	if err != nil {
-		c.logger.Error("Failed to copy response body", "error", err)
-		return err
+		c.logger.Error("Failed to read upstream body", "error", err)
+		return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
+			"error":   "Failed to read response from upstream",
+		})
 	}
 
-	c.logger.Info("Proxy response",
-		"status", resp.StatusCode,
-		"url", targetURL.String(),
-	)
+	// Copy specific safe headers
+	contentType := resp.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/json"
+	}
+	
+	// Send raw bytes
+	return ctx.Blob(resp.StatusCode, contentType, bodyBytes)
+}
 
-	return nil
+// ImageProxyHandler proxies valid image requests to bypass CORS and Referer checks for Anime
+func (c *Controller) ImageProxyHandler(ctx echo.Context) error {
+	imageURL := ctx.QueryParam("url")
+	if imageURL == "" {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Missing url parameter"})
+	}
+
+	// Validate URL
+	parsedURL, err := url.Parse(imageURL)
+	if err != nil || (parsedURL.Scheme != "http" && parsedURL.Scheme != "https") {
+		return ctx.JSON(http.StatusBadRequest, map[string]string{"error": "Invalid URL"})
+	}
+
+	req, err := http.NewRequest("GET", imageURL, nil)
+	if err != nil {
+		return ctx.JSON(http.StatusInternalServerError, map[string]string{"error": "Failed to create request"})
+	}
+
+	// Set headers for Otakudesu
+	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
+	req.Header.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
+	// Use the host of the image as referer, frequently works better for CDNs
+	req.Header.Set("Referer", parsedURL.Scheme + "://" + parsedURL.Host + "/")
+	
+	// Create a new client with custom transport to avoid HTTP/2 issues or compression issues
+	client := &http.Client{
+		Timeout: 15 * time.Second,
+		Transport: &http.Transport{
+			ForceAttemptHTTP2:     false, // Force HTTP/1.1
+			DisableKeepAlives:     true,
+			DisableCompression:    true, // We stream raw bytes, let's not compress/decompress
+			TLSHandshakeTimeout:   10 * time.Second,
+			ResponseHeaderTimeout: 10 * time.Second,
+		},
+	}
+
+	// Execute Request
+	resp, err := client.Do(req)
+	if err != nil {
+		c.logger.Error("Failed to fetch image", "url", imageURL, "error", err)
+		// Return the error message to the client for debugging
+		return ctx.JSON(http.StatusBadGateway, map[string]string{
+			"error": "Failed to fetch image from upstream",
+			"details": err.Error(),
+		})
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return ctx.JSON(resp.StatusCode, map[string]interface{}{
+			"error": "Upstream returned non-200 status", 
+			"code": resp.StatusCode,
+		})
+	}
+
+	// Stream response back
+	contentType := resp.Header.Get("Content-Type")
+	if contentType == "" {
+		contentType = "application/octet-stream"
+	}
+	
+	// Set caching
+	ctx.Response().Header().Set("Cache-Control", "public, max-age=86400")
+
+	return ctx.Stream(http.StatusOK, contentType, resp.Body)
 }
 
 // HealthCheck checks if the anime API is reachable
@@ -170,5 +231,17 @@ func (c *Controller) HealthCheck(ctx echo.Context) error {
 		"status":  "up",
 		"api_url": c.baseURL,
 		"code":    resp.StatusCode,
+	})
+}
+
+// GetGenres returns a mock list of genres since upstream is missing it
+func (c *Controller) GetGenres(ctx echo.Context) error {
+	return ctx.JSON(http.StatusOK, map[string]interface{}{
+		"statusCode": 200,
+		"statusMessage": "OK",
+		"message": "Mock genres",
+		"data": map[string]interface{}{
+			"genreList": []interface{}{},
+		},
 	})
 }
