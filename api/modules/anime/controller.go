@@ -1,6 +1,7 @@
 package anime
 
 import (
+	"encoding/json"
 	"io"
 	"net/http"
 	"net/url"
@@ -33,6 +34,9 @@ func NewController() *Controller {
 
 	client := &http.Client{
 		Timeout: time.Duration(timeout) * time.Second,
+		Transport: &http.Transport{
+			DisableCompression: true, // Don't automatically decompress responses
+		},
 		CheckRedirect: func(req *http.Request, via []*http.Request) error {
 			return http.ErrUseLastResponse
 		},
@@ -48,10 +52,10 @@ func NewController() *Controller {
 	}
 }
 
-// ProxyHandler handles reverse proxy to otakudesu API
+// ProxyHandler handles reverse proxy to kuramanime API
 func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	// Get the path after /api/v1/anime
-	// Example: /api/v1/anime/home -> /otakudesu/home
+	// Example: /api/v1/anime/home -> /kuramanime/home
 	requestPath := ctx.Request().URL.Path
 
 	// Remove /api/v1/anime prefix
@@ -59,9 +63,9 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 
 	// If empty, default to root
 	if targetPath == "" || targetPath == "/" {
-		targetPath = "/otakudesu"
+		targetPath = "/kuramanime"
 	} else {
-		targetPath = "/otakudesu" + targetPath
+		targetPath = "/kuramanime" + targetPath
 	}
 
 	// Build target URL
@@ -87,8 +91,12 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 		})
 	}
 
-	// Copy headers
+	// Copy headers but skip Accept-Encoding to get uncompressed response
 	for key, values := range ctx.Request().Header {
+		// Skip Accept-Encoding to prevent gzip compression
+		if key == "Accept-Encoding" {
+			continue
+		}
 		for _, value := range values {
 			proxyReq.Header.Add(key, value)
 		}
@@ -98,6 +106,8 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	proxyReq.Header.Set("X-Forwarded-For", ctx.RealIP())
 	proxyReq.Header.Set("X-Forwarded-Proto", ctx.Scheme())
 	proxyReq.Header.Set("X-Forwarded-Host", ctx.Request().Host)
+	// Explicitly request no compression
+	proxyReq.Header.Set("Accept-Encoding", "identity")
 
 	// Log request
 	c.logger.Info("Proxying request",
@@ -127,14 +137,20 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 		})
 	}
 
-	// Copy specific safe headers
-	contentType := resp.Header.Get("Content-Type")
-	if contentType == "" {
-		contentType = "application/json"
+	// Parse JSON and re-encode to ensure proper formatting
+	var jsonData interface{}
+	if err := json.Unmarshal(bodyBytes, &jsonData); err != nil {
+		c.logger.Error("Failed to parse JSON", "error", err)
+		// If not JSON, send as-is
+		contentType := resp.Header.Get("Content-Type")
+		if contentType == "" {
+			contentType = "application/octet-stream"
+		}
+		return ctx.Blob(resp.StatusCode, contentType, bodyBytes)
 	}
 
-	// Send raw bytes
-	return ctx.Blob(resp.StatusCode, contentType, bodyBytes)
+	// Return properly formatted JSON
+	return ctx.JSON(resp.StatusCode, jsonData)
 }
 
 // ImageProxyHandler proxies valid image requests to bypass CORS and Referer checks for Anime
