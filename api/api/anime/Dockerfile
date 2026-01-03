@@ -19,6 +19,21 @@ RUN npm run build
 # Use a smaller image for the runtime
 FROM node:20-alpine
 
+# Install Chromium and required dependencies
+RUN apk add --no-cache \
+    chromium \
+    nss \
+    freetype \
+    harfbuzz \
+    ca-certificates \
+    ttf-freefont \
+    nodejs \
+    yarn
+
+# Set Chromium path environment variable
+ENV PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser
+
 # Set the working directory in the container
 WORKDIR /usr/src/app
 

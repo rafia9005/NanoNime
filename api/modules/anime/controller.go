@@ -123,7 +123,7 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	if err != nil {
 		c.logger.Error("Failed to read upstream body", "error", err)
 		return ctx.JSON(http.StatusBadGateway, map[string]interface{}{
-			"error":   "Failed to read response from upstream",
+			"error": "Failed to read response from upstream",
 		})
 	}
 
@@ -132,7 +132,7 @@ func (c *Controller) ProxyHandler(ctx echo.Context) error {
 	if contentType == "" {
 		contentType = "application/json"
 	}
-	
+
 	// Send raw bytes
 	return ctx.Blob(resp.StatusCode, contentType, bodyBytes)
 }
@@ -159,8 +159,8 @@ func (c *Controller) ImageProxyHandler(ctx echo.Context) error {
 	req.Header.Set("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36")
 	req.Header.Set("Accept", "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8")
 	// Use the host of the image as referer, frequently works better for CDNs
-	req.Header.Set("Referer", parsedURL.Scheme + "://" + parsedURL.Host + "/")
-	
+	req.Header.Set("Referer", parsedURL.Scheme+"://"+parsedURL.Host+"/")
+
 	// Create a new client with custom transport to avoid HTTP/2 issues or compression issues
 	client := &http.Client{
 		Timeout: 15 * time.Second,
@@ -179,7 +179,7 @@ func (c *Controller) ImageProxyHandler(ctx echo.Context) error {
 		c.logger.Error("Failed to fetch image", "url", imageURL, "error", err)
 		// Return the error message to the client for debugging
 		return ctx.JSON(http.StatusBadGateway, map[string]string{
-			"error": "Failed to fetch image from upstream",
+			"error":   "Failed to fetch image from upstream",
 			"details": err.Error(),
 		})
 	}
@@ -187,8 +187,8 @@ func (c *Controller) ImageProxyHandler(ctx echo.Context) error {
 
 	if resp.StatusCode != http.StatusOK {
 		return ctx.JSON(resp.StatusCode, map[string]interface{}{
-			"error": "Upstream returned non-200 status", 
-			"code": resp.StatusCode,
+			"error": "Upstream returned non-200 status",
+			"code":  resp.StatusCode,
 		})
 	}
 
@@ -197,7 +197,7 @@ func (c *Controller) ImageProxyHandler(ctx echo.Context) error {
 	if contentType == "" {
 		contentType = "application/octet-stream"
 	}
-	
+
 	// Set caching
 	ctx.Response().Header().Set("Cache-Control", "public, max-age=86400")
 
@@ -237,9 +237,9 @@ func (c *Controller) HealthCheck(ctx echo.Context) error {
 // GetGenres returns a mock list of genres since upstream is missing it
 func (c *Controller) GetGenres(ctx echo.Context) error {
 	return ctx.JSON(http.StatusOK, map[string]interface{}{
-		"statusCode": 200,
+		"statusCode":    200,
 		"statusMessage": "OK",
-		"message": "Mock genres",
+		"message":       "Mock genres",
 		"data": map[string]interface{}{
 			"genreList": []interface{}{},
 		},
